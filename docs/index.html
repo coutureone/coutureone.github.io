@@ -622,6 +622,7 @@
   });
 
   // 页面加载
+  // 页面加载
   window.addEventListener('load', () => {
     document.body.classList.remove('loading');
     progressBar.style.width = '100%';
@@ -633,7 +634,7 @@
       button.style.color = 'var(--button-text)';
       button.style.border = '1px solid var(--button-border)';
     });
-  });
+  }); // 补全闭合括号
 
   // 代码块样式
   document.querySelectorAll('pre code').forEach(block => {
