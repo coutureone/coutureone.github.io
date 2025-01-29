@@ -2,7 +2,7 @@
 <html lang="en" class="loading">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="shortcut icon" href="https://fav.farm/👨🏻‍💻" />
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title> Couture's Blog </title>
@@ -14,10 +14,11 @@
       document.documentElement.setAttribute('data-theme', window.theme);
     });
 
-    // MutationObserver 逻辑保持不变
+    // 创建一个 MutationObserver 来监听属性变化
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          // 当 loading 类被移除时，重新应用主题
           if (!document.documentElement.classList.contains('loading')) {
             document.documentElement.setAttribute('data-theme', window.theme);
           }
@@ -25,10 +26,12 @@
       });
     });
 
+    // 开始观察 html 元素的属性变化
     window.addEventListener('load', () => {
       observer.observe(document.documentElement, {
         attributes: true
       });
+      // 确保在页面加载完成后移除 loading 类
       document.documentElement.classList.remove('loading');
     });
   </script>
@@ -47,7 +50,6 @@
     }
   </script>
   <style>
-    /* 所有原始样式保持不变 */
     @font-face {
       font-family: "LxgwWenkaiGB";
       src: url("LXGWWenKaiGB-Regular.ttf");
@@ -59,7 +61,6 @@
       background-color: var(--bg-color);
       color: var(--text-color);
     }
-
 
     /* 确保所有文本元素都使用 LxgwWenkaiGB 字体 */
     h1, h2, h3, h4, h5, h6, p, span, a, li, div, pre, code {
@@ -480,7 +481,74 @@
       transition: width 0.2s ease;
     }
 
-    /* 其他样式保持不变 */
+    /* 按钮基础样式 */
+    button, input[type="button"] {
+      padding: 6px 12px;
+      background: var(--button-bg);
+      color: var(--button-text);
+      border: 1px solid var(--button-border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    button:hover, input[type="button"]:hover {
+      background: var(--button-hover-bg);
+    }
+
+    /* 评论按钮样式 */
+    .comment-button {
+      background: var(--card-bg);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .comment-button:hover {
+      background: var(--border-color);
+      color: var(--text-color);
+    }
+
+    /* 代码块和内容背景 */
+    .post-content {
+      background: var(--post-bg);
+      border-radius: 6px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--code-border);
+      border-radius: 6px;
+      padding: 16px;
+      margin: 16px 0;
+      overflow-x: auto;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--code-text);
+    }
+
+    /* 标签样式 */
+    .tag {
+      background: var(--card-bg);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 0.9em;
+    }
+
+    /* 确保所有元素使用变量 */
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+    }
   </style>
 </head>
 <body>
@@ -488,10 +556,7 @@
   <span class="sun">☀️</span>
   <span class="moon">🌙</span>
 </button>
-<!-- 确保进度条元素存在 -->
-<div id="progress">
-  <div id="progress-bar"></div>
-</div>
+<div id="bar"></div>
 <div class="page home" style="background: var(--bg-color);">
   <div>
     <div id="user"></div>
@@ -507,12 +572,16 @@
 <div id="loader"><div></div><div></div><div></div><div></div></div>
 <script src="./index.92ae90d1.js"></script>
 <script>
-  // 主题切换逻辑（保持不变）
+  // 主题切换
   const themeToggle = document.getElementById('theme-toggle');
   const body = document.body;
+
+  // 获取当前主题
   const currentTheme = localStorage.getItem('theme') || 'light';
   body.setAttribute('data-theme', currentTheme);
+  updateThemeIcon(currentTheme);
 
+  // 更新主题图标
   function updateThemeIcon(theme) {
     const moonIcon = document.querySelector('.moon');
     const sunIcon = document.querySelector('.sun');
@@ -524,58 +593,56 @@
       sunIcon.style.opacity = 0;
     }
   }
-
+  // 修改主题切换事件监听器
   themeToggle.addEventListener('click', () => {
     const currentTheme = document.documentElement.getAttribute('data-theme');
     const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+    // 更新所有相关位置
     document.documentElement.setAttribute('data-theme', newTheme);
-    window.theme = newTheme;
+    window.theme = newTheme; // 更新全局变量
     localStorage.setItem('theme', newTheme);
     updateThemeIcon(newTheme);
+
+    // 强制重新应用过渡
     document.documentElement.style.transition = 'all 0.3s ease';
     setTimeout(() => {
       document.documentElement.style.transition = '';
     }, 300);
   });
 
-  // 修正后的进度条和初始化逻辑
-  document.addEventListener('DOMContentLoaded', () => {
-    const progressBar = document.getElementById('progress-bar');
+  // 进度条
+  const progress = document.getElementById('progress');
+  const progressBar = document.getElementById('progress-bar');
 
-    // 检查元素是否存在
-    if (!progressBar) {
-      console.error('Error: #progress-bar element not found.');
-      return;
-    }
+  window.addEventListener('scroll', () => {
+    const windowHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrolled = (window.scrollY / windowHeight) * 100;
+    progressBar.style.width = scrolled + '%';
+  });
 
-    // 滚动事件
-    window.addEventListener('scroll', () => {
-      const windowHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const scrolled = (window.scrollY / windowHeight) * 100;
-      progressBar.style.width = scrolled + '%';
-    });
+  // 页面加载
+  window.addEventListener('load', () => {
+    document.body.classList.remove('loading');
+    progressBar.style.width = '100%';
+  });
 
-    // 页面加载完成事件
-    window.addEventListener('load', () => {
-      document.body.classList.remove('loading');
-      progressBar.style.width = '100%'; // 语法修正
-    });
-
-    // 按钮样式初始化
+  // 确保所有按钮使用正确的主题颜色
+  window.addEventListener('load', () => {
     const buttons = document.querySelectorAll('button, input[type="button"]');
     buttons.forEach(button => {
       button.style.backgroundColor = 'var(--button-bg)';
       button.style.color = 'var(--button-text)';
       button.style.border = '1px solid var(--button-border)';
     });
+  });
 
-    // 代码块样式初始化
-    document.querySelectorAll('pre code').forEach(block => {
-      block.style.backgroundColor = 'var(--code-bg)';
-      block.style.color = 'var(--code-text)';
-      block.style.borderRadius = '6px';
-      block.style.padding = '1em';
-    });
+  // 代码块样式
+  document.querySelectorAll('pre code').forEach(block => {
+    block.style.backgroundColor = 'var(--code-bg)';
+    block.style.color = 'var(--code-text)';
+    block.style.borderRadius = '6px';
+    block.style.padding = '1em';
   });
 </script>
 </body>
