@@ -8,42 +8,13 @@
   <title> Couture's Blog </title>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      window.theme = localStorage.getItem('theme') ||
+      const savedTheme = localStorage.getItem('theme') ||
               (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-      document.documentElement.setAttribute('data-theme', window.theme);
-    });
-
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-          if (!document.documentElement.classList.contains('loading')) {
-            document.documentElement.setAttribute('data-theme', window.theme);
-          }
-        }
-      });
-    });
-
-    window.addEventListener('load', () => {
-      observer.observe(document.documentElement, {
-        attributes: true
-      });
-      document.documentElement.classList.remove('loading');
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      window.theme = savedTheme;
     });
   </script>
   <link rel="preload" href="LXGWWenKaiGB-Regular.ttf" as="font" type="font/ttf" crossorigin>
-  <script>
-    window.config = {
-      organization: false,
-      order: 'CREATED_AT',
-      title: "Couture's Blog",
-      user: 'coutureone',
-      repository: 'gitblog',
-      authors: 'Couture',
-      ignores: '',
-      hash: 'ghp_WxJ$kKHi^rOFBUcCxwypTbLbEh(xRs#dw%hhYmxvZy5jb3V0dXJlcy50b3A=',
-      perpage: 5,
-    }
-  </script>
   <style>
     @font-face {
       font-family: "LxgwWenkaiGB";
@@ -120,88 +91,70 @@
       --code-function: #d2a8ff;
       --code-variable: #ffa657;
       --code-operator: #e6edf3;
-      --progress-bg: transparent;
     }
 
     body {
       font-family: "LxgwWenkaiGB", sans-serif;
       background-color: var(--bg-color);
       color: var(--text-color);
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
-    h1, h2, h3, h4, h5, h6, p, span, a, li, div, pre, code {
-      font-family: "LxgwWenkaiGB", sans-serif;
+    .theme-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      width: 32px;
+      height: 32px;
+      padding: 4px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      line-height: 1;
     }
 
-    body * {
-      font-family: "LxgwWenkaiGB", sans-serif !important;
+    .theme-toggle .sun,
+    .theme-toggle .moon {
+      position: absolute;
+      transition: opacity 0.3s ease;
     }
 
-    * {
-      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    .theme-toggle .sun {
+      opacity: 0;
     }
 
-    .card, .post, .bar {
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      overflow: hidden;
+    .theme-toggle .moon {
+      opacity: 1;
     }
 
-    ::selection {
-      background-color: var(--selection-bg);
-      color: var(--selection-color);
+    [data-theme="dark"] .theme-toggle .sun {
+      opacity: 1;
     }
 
-    .single .post {
-      color: var(--post-content);
+    [data-theme="dark"] .theme-toggle .moon {
+      opacity: 0;
     }
 
-    .single .post blockquote {
-      color: var(--post-content);
-      border-left-color: var(--border-color);
+    #progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--progress-bg);
+      z-index: 9999;
     }
 
-    .single .post code {
-      background-color: var(--code-bg);
-      color: var(--code-text);
-    }
-
-    .single .post pre {
-      background-color: var(--code-bg);
-      color: var(--code-text);
-    }
-
-    .single .post hr {
-      border-color: var(--border-color);
-    }
-
-    #user {
-      border-color: var(--border-color);
-    }
-
-    .avatar {
-      border-color: var(--border-color);
-    }
-
-    .comments {
-      background-color: var(--post-bg);
-      border-color: var(--border-color);
-    }
-
-    .comment-meta {
-      color: var(--post-time);
-    }
-
-    .loading,
-    .error,
-    .transition {
+    #progress-bar {
+      width: 0;
       height: 100%;
-    }
-
-    .loading body,
-    .error body,
-    .transition body {
-      height: 100%;
+      background: var(--progress-color);
+      transition: width 0.2s ease;
     }
 
     #loader {
@@ -259,212 +212,6 @@
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
-
-    #posts .post {
-      background-color: var(--post-bg);
-      border-color: var(--border-color);
-    }
-
-    #posts .post .title {
-      color: var(--post-title);
-    }
-
-    #posts .post .time {
-      color: var(--post-time);
-    }
-
-    #posts .post .preview {
-      color: var(--post-content);
-    }
-
-    #bar {
-      background-color: var(--bar-bg);
-      border-color: var(--bar-border);
-    }
-
-    .single #post {
-      background-color: var(--post-bg);
-      color: var(--post-content);
-    }
-
-    .single #post .title {
-      color: var(--post-title);
-    }
-
-    .single #post .time {
-      color: var(--post-time);
-    }
-
-    .single #post pre {
-      background-color: var(--code-bg);
-      border-color: var(--border-color);
-    }
-
-    .single #post code {
-      color: var(--code-text);
-    }
-
-    #comments {
-      background-color: var(--post-bg);
-      border-color: var(--border-color);
-    }
-
-    .theme-toggle {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
-      width: 32px;
-      height: 32px;
-      padding: 4px;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      line-height: 1;
-    }
-
-    .theme-toggle .sun,
-    .theme-toggle .moon {
-      position: absolute;
-      transition: opacity 0.3s ease;
-    }
-
-    .theme-toggle .sun {
-      opacity: 0;
-    }
-
-    .theme-toggle .moon {
-      opacity: 1;
-    }
-
-    [data-theme="dark"] .theme-toggle .sun {
-      opacity: 1;
-    }
-
-    [data-theme="dark"] .theme-toggle .moon {
-      opacity: 0;
-    }
-
-    pre {
-      background: var(--code-bg);
-      border: 1px solid var(--code-border);
-      border-radius: 6px;
-      padding: 16px;
-      margin: 16px 0;
-      overflow-x: auto;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    pre code {
-      color: var(--code-text);
-      background: transparent;
-      padding: 0;
-      border: none;
-    }
-
-    .token.comment { color: var(--code-comment); }
-    .token.keyword { color: var(--code-keyword); }
-    .token.string { color: var(--code-string); }
-    .token.number { color: var(--code-number); }
-    .token.function { color: var(--code-function); }
-    .token.variable { color: var(--code-variable); }
-    .token.operator { color: var(--code-operator); }
-
-    :not(pre) > code {
-      background: var(--code-bg);
-      color: var(--code-text);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 0.9em;
-      border: 1px solid var(--code-border);
-    }
-
-    pre::-webkit-scrollbar {
-      height: 8px;
-      background-color: var(--code-bg);
-    }
-
-    pre::-webkit-scrollbar-thumb {
-      background-color: var(--border-color);
-      border-radius: 4px;
-    }
-
-    body, .card, .post, .bar {
-      transition: all 0.3s ease;
-    }
-
-    #progress {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: var(--progress-bg);
-      z-index: 9999;
-    }
-
-    #progress-bar {
-      width: 0;
-      height: 100%;
-      background: var(--progress-color);
-      transition: width 0.2s ease;
-    }
-
-    button, input[type="button"] {
-      padding: 6px 12px;
-      background: var(--button-bg);
-      color: var(--button-text);
-      border: 1px solid var(--button-border);
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    button:hover, input[type="button"]:hover {
-      background: var(--button-hover-bg);
-    }
-
-    .comment-button {
-      background: var(--card-bg);
-      color: var(--text-color);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      padding: 8px 16px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .comment-button:hover {
-      background: var(--border-color);
-      color: var(--text-color);
-    }
-
-    .post-content {
-      background: var(--post-bg);
-      border-radius: 6px;
-      padding: 20px;
-      margin: 20px 0;
-    }
-
-    code {
-      font-family: 'JetBrains Mono', monospace;
-      color: var(--code-text);
-    }
-
-    .tag {
-      background: var(--card-bg);
-      color: var(--text-color);
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      padding: 4px 8px;
-      font-size: 0.9em;
-    }
   </style>
 </head>
 <body>
@@ -472,7 +219,9 @@
   <span class="sun">☀️</span>
   <span class="moon">🌙</span>
 </button>
-<div id="bar"></div>
+<div id="progress">
+  <div id="progress-bar"></div>
+</div>
 <div class="page home" style="background: var(--bg-color);">
   <div>
     <div id="user"></div>
@@ -486,9 +235,9 @@
   </div>
 </div>
 <div id="loader"><div></div><div></div><div></div><div></div></div>
-<script src="./index.92ae90d1.js"></script>
 <script>
   const themeToggle = document.getElementById('theme-toggle');
+  const progressBar = document.getElementById('progress-bar');
 
   function getCurrentTheme() {
     return localStorage.getItem('theme') || 'light';
@@ -516,11 +265,15 @@
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
     updateThemeIcon(newTheme);
+
+    // 强制重新渲染页面内容
+    document.body.style.display = 'none';
+    document.body.offsetHeight; // 触发重绘
+    document.body.style.display = '';
   });
 
   initTheme();
 
-  const progressBar = document.getElementById('progress-bar');
   window.addEventListener('scroll', () => {
     const windowHeight = document.documentElement.scrollHeight - window.innerHeight;
     const scrolled = (window.scrollY / windowHeight) * 100;
@@ -530,20 +283,6 @@
   window.addEventListener('load', () => {
     document.body.classList.remove('loading');
     progressBar.style.width = '100%';
-
-    const buttons = document.querySelectorAll('button, input[type="button"]');
-    buttons.forEach(button => {
-      button.style.backgroundColor = 'var(--button-bg)';
-      button.style.color = 'var(--button-text)';
-      button.style.border = '1px solid var(--button-border)';
-    });
-  });
-
-  document.querySelectorAll('pre code').forEach(block => {
-    block.style.backgroundColor = 'var(--code-bg)';
-    block.style.color = 'var(--code-text)';
-    block.style.borderRadius = '6px';
-    block.style.padding = '1em';
   });
 </script>
 </body>
