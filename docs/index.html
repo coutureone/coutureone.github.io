@@ -8,31 +8,32 @@
   <title> Couture's Blog </title>
   <link rel="stylesheet" href="https://chinese-fonts-cdn.deno.dev/packages/lywkpmydb/dist/LXGWWenKaiScreen/result.css">
   <script>
-    // 初始化主题并设置到全局变量
+    // 初始化主题
     document.addEventListener('DOMContentLoaded', () => {
-      window.theme = localStorage.getItem('theme') ||
-              (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      const savedTheme = localStorage.getItem('theme');
+      const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      window.theme = savedTheme || (systemDark ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', window.theme);
     });
 
-    // 创建一个 MutationObserver 来监听属性变化
+    // 监听类名变化
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
-        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-          // 当 loading 类被移除时，重新应用主题
-          if (!document.documentElement.classList.contains('loading')) {
+        if (mutation.attributeName === 'class') {
+          const currentClasses = document.documentElement.className;
+          if (!currentClasses.includes('loading')) {
             document.documentElement.setAttribute('data-theme', window.theme);
           }
         }
       });
     });
 
-    // 开始观察 html 元素的属性变化
+    // 页面加载完成处理
     window.addEventListener('load', () => {
       observer.observe(document.documentElement, {
-        attributes: true
+        attributes: true,
+        attributeFilter: ['class']
       });
-      // 确保在页面加载完成后移除 loading 类
       document.documentElement.classList.remove('loading');
     });
   </script>
@@ -51,23 +52,27 @@
     }
   </script>
   <style>
+    /* 基础样式 */
     body {
       font-family: "LXGW WenKai Screen", sans-serif;
       background-color: var(--bg-color);
       color: var(--text-color);
       margin: 0;
       padding: 0;
+      line-height: 1.6;
     }
 
-    /* 确保所有文本元素都使用苹方字体 */
-    h1, h2, h3, h4, h5, h6, p, span, a, li, div, pre, code {
-      font-family: "LXGW WenKai Screen", sans-serif;
+    /* 字体继承 */
+    h1, h2, h3, h4, h5, h6, p, span, a, li, div {
+      font-family: inherit;
     }
 
     pre, code {
-      font-family: 'JetBrains Mono', monospace !important;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95em;
     }
 
+    /* 根变量 */
     :root {
       /* 基础颜色 */
       --bg-color: #ffffff;
@@ -76,13 +81,13 @@
       --border-color: #d0d7de;
       --shadow-color: rgba(0, 0, 0, 0.1);
 
-      /* 按钮样式 */
+      /* 按钮系统 */
       --button-bg: #f6f8fa;
       --button-text: #24292f;
       --button-border: #d0d7de;
       --button-hover-bg: #f3f4f6;
 
-      /* 内容区域 */
+      /* 内容容器 */
       --card-bg: #ffffff;
       --card-border: #d0d7de;
       --post-bg: #ffffff;
@@ -92,7 +97,7 @@
       --bar-bg: #ffffff;
       --bar-border: #d0d7de;
 
-      /* 代码块样式 */
+      /* 代码块 */
       --code-bg: #f6f8fa;
       --code-text: #24292e;
       --code-border: #e1e4e8;
@@ -106,14 +111,14 @@
       --code-variable: #953800;
       --code-operator: #24292f;
 
-      /* 加载进度条颜色 */
+      /* 加载动画 */
       --loader-bg: rgba(255, 255, 255, .95);
       --loader-color-1: #0089fa;
       --loader-color-2: #ff002b;
       --loader-color-3: #ffa900;
       --loader-color-4: #00a753;
 
-      /* 进度条颜色 */
+      /* 进度条 */
       --progress-bg: transparent;
       --progress-color: #0969da;
 
@@ -122,21 +127,19 @@
       --selection-color: #333333;
     }
 
+    /* 暗色模式 */
     [data-theme="dark"] {
-      /* 基础颜色 */
       --bg-color: #0d1117;
       --text-color: #c9d1d9;
       --link-color: #58a6ff;
       --border-color: #30363d;
       --shadow-color: rgba(0, 0, 0, 0.3);
 
-      /* 按钮样式 - 暗色模式 */
       --button-bg: #21262d;
       --button-text: #c9d1d9;
       --button-border: #30363d;
       --button-hover-bg: #30363d;
 
-      /* 内容区域 - 暗色模式 */
       --card-bg: #0d1117;
       --card-border: #30363d;
       --post-bg: #0d1117;
@@ -146,7 +149,6 @@
       --bar-bg: #0d1117;
       --bar-border: #30363d;
 
-      /* 代码块样式 */
       --code-bg: #161b22;
       --code-text: #e6edf3;
       --code-border: #30363d;
@@ -159,253 +161,90 @@
       --code-operator: #e6edf3;
     }
 
-    /* 全局过渡效果 */
+    /* 全局过渡 */
     * {
-      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      transition: background-color 0.3s ease,
+      color 0.3s ease,
+      border-color 0.3s ease,
+      box-shadow 0.3s ease;
     }
 
-    /* 按钮基础样式 - 使用CSS变量 */
-    button, input[type="button"], .button {
-      padding: 6px 12px;
+    /* 按钮系统 */
+    button,
+    input[type="button"],
+    input[type="submit"],
+    input[type="reset"],
+    .button {
+      padding: 8px 16px;
       background-color: var(--button-bg);
       color: var(--button-text);
       border: 1px solid var(--button-border);
       border-radius: 6px;
       cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    button:hover, input[type="button"]:hover, .button:hover {
-      background-color: var(--button-hover-bg);
-    }
-
-    /* 统一边框样式 */
-    .card, .post, .bar {
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-family: inherit;
+      font-size: 14px;
+      line-height: 1.25;
+      box-shadow: 0 1px 2px var(--shadow-color);
+      position: relative;
       overflow: hidden;
     }
 
-    /* 添加选中文本的样式 */
-    ::selection {
-      background-color: var(--selection-bg);
-      color: var(--selection-color);
+    button:hover,
+    input[type="button"]:hover,
+    input[type="submit"]:hover,
+    input[type="reset"]:hover,
+    .button:hover {
+      background-color: var(--button-hover-bg);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px var(--shadow-color);
     }
 
-    /* 补充文章内容的样式 */
-    .single .post {
-      background-color: var(--post-bg);
-      color: var(--post-content);
+    button:active,
+    input[type="button"]:active,
+    input[type="submit"]:active,
+    input[type="reset"]:active,
+    .button:active {
+      transform: translateY(0);
+      box-shadow: 0 1px 1px var(--shadow-color);
     }
 
-    .single .post h1,
-    .single .post h2,
-    .single .post h3,
-    .single .post h4,
-    .single .post h5,
-    .single .post h6 {
-      color: var(--post-title);
-    }
-
-    .single .post blockquote {
-      color: var(--post-content);
-      border-left-color: var(--border-color);
-    }
-
-    .single .post code {
-      background-color: var(--code-bg);
-      color: var(--code-text);
-    }
-
-    .single .post pre {
-      background-color: var(--code-bg);
-      color: var(--code-text);
-    }
-
-    .single .post hr {
-      border-color: var(--border-color);
-    }
-
-    /* 加载状态样式 */
-    .loading,
-    .error,
-    .transition {
-      height: 100%;
-    }
-
-    .loading body,
-    .error body,
-    .transition body {
-      height: 100%;
-    }
-
-    /* 加载动画容器 */
-    #loader {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: var(--loader-bg);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-
-    .loading #loader {
-      display: flex;
-    }
-
-    /* 加载动画 */
-    #loader div {
-      position: absolute;
-      width: 40px;
-      height: 40px;
-      border: 3px solid transparent;
-      border-radius: 50%;
-    }
-
-    #loader div:nth-child(1) {
-      border-top-color: var(--loader-color-1);
-      animation: spin 1s linear infinite;
-    }
-
-    #loader div:nth-child(2) {
-      width: 55px;
-      height: 55px;
-      border-right-color: var(--loader-color-2);
-      animation: spin 1.2s linear infinite reverse;
-    }
-
-    #loader div:nth-child(3) {
-      width: 70px;
-      height: 70px;
-      border-bottom-color: var(--loader-color-3);
-      animation: spin 1.4s linear infinite;
-    }
-
-    #loader div:nth-child(4) {
-      width: 85px;
-      height: 85px;
-      border-left-color: var(--loader-color-4);
-      animation: spin 1.6s linear infinite reverse;
-    }
-
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    /* 内容区域样式 */
-    #posts .post {
-      background-color: var(--post-bg);
-      border-color: var(--border-color);
-    }
-
-    #posts .post .title {
-      color: var(--post-title);
-    }
-
-    #posts .post .time {
-      color: var(--post-time);
-    }
-
-    #posts .post .preview {
-      color: var(--post-content);
-    }
-
-    #bar {
-      background-color: var(--bar-bg);
-      border-color: var(--bar-border);
-    }
-
-    /* 进度条样式 */
-    #progress {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: var(--progress-bg);
-      z-index: 9999;
-    }
-
-    #progress-bar {
-      width: 0;
-      height: 100%;
-      background: var(--progress-color);
-      transition: width 0.2s ease;
-    }
-
-    /* 代码块基础样式 */
-    pre {
-      background: var(--code-bg);
-      border: 1px solid var(--code-border);
-      border-radius: 6px;
-      padding: 16px;
-      margin: 16px 0;
-      overflow-x: auto;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    pre code {
-      color: var(--code-text);
-      background: transparent;
-      padding: 0;
-      border: none;
-    }
-
-    /* 代码高亮 */
-    .token.comment { color: var(--code-comment); }
-    .token.keyword { color: var(--code-keyword); }
-    .token.string { color: var(--code-string); }
-    .token.number { color: var(--code-number); }
-    .token.function { color: var(--code-function); }
-    .token.variable { color: var(--code-variable); }
-    .token.operator { color: var(--code-operator); }
-
-    /* 行内代码样式 */
-    :not(pre) > code {
-      background: var(--inline-code-bg);
-      color: var(--inline-code-text);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 0.9em;
-      border: 1px solid var(--code-border);
-    }
-
-    /* 主题切换按钮样式 */
+    /* 主题切换按钮 */
     #theme-toggle {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 40px;
-      height: 40px;
+      bottom: 24px;
+      right: 24px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
-      background: var(--button-bg);
-      color: var(--button-text);
+      background-color: var(--button-bg);
       border: 1px solid var(--button-border);
+      box-shadow: 0 4px 12px var(--shadow-color);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 1000;
-      transition: all 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     #theme-toggle:hover {
-      background: var(--button-hover-bg);
+      background-color: var(--button-hover-bg);
+      transform: scale(1.1) rotate(15deg);
+    }
+
+    #theme-toggle:active {
+      transform: scale(0.95);
     }
 
     #theme-toggle svg {
-      position: absolute;
+      width: 24px;
+      height: 24px;
       transition: opacity 0.3s ease;
     }
 
     #theme-toggle .sun {
+      position: absolute;
       opacity: 0;
     }
 
@@ -416,100 +255,205 @@
     [data-theme="dark"] #theme-toggle .sun {
       opacity: 1;
     }
+
+    /* 其他组件样式 */
+    .card, .post, .bar {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      margin: 16px 0;
+      box-shadow: 0 2px 4px var(--shadow-color);
+    }
+
+    #progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--progress-bg);
+      z-index: 9999;
+    }
+
+    #progress-bar {
+      height: 100%;
+      background: var(--progress-color);
+      transition: width 0.2s ease-out;
+    }
+
+    /* 加载动画 */
+    #loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--loader-bg);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9998;
+    }
+
+    .loading #loader {
+      display: flex;
+    }
+
+    #loader div {
+      position: absolute;
+      border: 3px solid transparent;
+      border-radius: 50%;
+      animation: spin linear infinite;
+    }
+
+    #loader div:nth-child(1) {
+      width: 40px;
+      height: 40px;
+      border-top-color: var(--loader-color-1);
+      animation-duration: 1s;
+    }
+
+    #loader div:nth-child(2) {
+      width: 55px;
+      height: 55px;
+      border-right-color: var(--loader-color-2);
+      animation-duration: 1.2s;
+      animation-direction: reverse;
+    }
+
+    #loader div:nth-child(3) {
+      width: 70px;
+      height: 70px;
+      border-bottom-color: var(--loader-color-3);
+      animation-duration: 1.4s;
+    }
+
+    #loader div:nth-child(4) {
+      width: 85px;
+      height: 85px;
+      border-left-color: var(--loader-color-4);
+      animation-duration: 1.6s;
+      animation-direction: reverse;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* 文本选中样式 */
+    ::selection {
+      background-color: var(--selection-bg);
+      color: var(--selection-color);
+    }
   </style>
 </head>
 <body>
 <div id="progress">
   <div id="progress-bar"></div>
 </div>
-<div id="bar"></div>
-<div class="page home" style="background: var(--bg-color);">
+
+<div id="bar" class="bar"></div>
+
+<div class="page home">
   <div>
-    <div id="user"></div>
-    <div id="posts"></div>
+    <div id="user" class="card"></div>
+    <div id="posts">
+      <div class="post">
+        <!-- 文章内容动态加载 -->
+      </div>
+    </div>
   </div>
 </div>
-<div class="page single" style="background: var(--bg-color);">
+
+<div class="page single">
   <div>
-    <div id="post"></div>
-    <div id="comments"></div>
+    <div id="post" class="post"></div>
+    <div id="comments" class="card"></div>
   </div>
 </div>
-<div id="loader"><div></div><div></div><div></div><div></div></div>
+
+<div id="loader">
+  <div></div>
+  <div></div>
+  <div></div>
+  <div></div>
+</div>
+
 <button id="theme-toggle">
-  <svg class="moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
   </svg>
-  <svg class="sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-    <circle cx="12" cy="12" r="5"></circle>
-    <line x1="12" y1="1" x2="12" y2="3"></line>
-    <line x1="12" y1="21" x2="12" y2="23"></line>
-    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-    <line x1="1" y1="12" x2="3" y2="12"></line>
-    <line x1="21" y1="12" x2="23" y2="12"></line>
-    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+    <circle cx="12" cy="12" r="5"/>
+    <line x1="12" y1="1" x2="12" y2="3"/>
+    <line x1="12" y1="21" x2="12" y2="23"/>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+    <line x1="1" y1="12" x2="3" y2="12"/>
+    <line x1="21" y1="12" x2="23" y2="12"/>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
   </svg>
 </button>
+
 <script src="./index.92ae90d1.js"></script>
+
 <script>
   // 主题切换功能
   const themeToggle = document.getElementById('theme-toggle');
+  let isTransitioning = false;
 
-  // 更新主题图标
-  function updateThemeIcon(theme) {
+  function updateTheme(theme) {
+    if (isTransitioning) return;
+    isTransitioning = true;
+
+    document.documentElement.style.transition = 'none';
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    window.theme = theme;
+
+    requestAnimationFrame(() => {
+      document.documentElement.style.transition = '';
+      isTransitioning = false;
+    });
+
+    // 更新图标
     const moonIcon = document.querySelector('.moon');
     const sunIcon = document.querySelector('.sun');
-    if (theme === 'dark') {
-      moonIcon.style.opacity = 0;
-      sunIcon.style.opacity = 1;
-    } else {
-      moonIcon.style.opacity = 1;
-      sunIcon.style.opacity = 0;
-    }
+    moonIcon.style.opacity = theme === 'dark' ? 0 : 1;
+    sunIcon.style.opacity = theme === 'dark' ? 1 : 0;
   }
 
-  // 主题切换函数
   function toggleTheme() {
     const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-
-    // 更新根元素的 data-theme 属性
-    document.documentElement.setAttribute('data-theme', newTheme);
-
-    // 更新 localStorage
-    localStorage.setItem('theme', newTheme);
-
-    // 更新全局变量
-    window.theme = newTheme;
-
-    // 更新主题图标
-    updateThemeIcon(newTheme);
+    updateTheme(currentTheme === 'light' ? 'dark' : 'light');
   }
 
-  // 主题切换按钮事件监听
   themeToggle.addEventListener('click', toggleTheme);
 
   // 初始化主题图标
   document.addEventListener('DOMContentLoaded', () => {
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-    updateThemeIcon(currentTheme);
+    const initialTheme = document.documentElement.getAttribute('data-theme');
+    updateTheme(initialTheme);
   });
 
-  // 进度条
-  const progressBar = document.getElementById('progress-bar');
-
+  // 滚动进度条
   window.addEventListener('scroll', () => {
-    const windowHeight = document.documentElement.scrollHeight - window.innerHeight;
-    const scrolled = (window.scrollY / windowHeight) * 100;
-    progressBar.style.width = scrolled + '%';
+    const scrollY = window.scrollY;
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = (scrollY / maxScroll) * 100;
+    document.getElementById('progress-bar').style.width = `${progress}%`;
   });
 
-  // 页面加载
+  // 页面加载完成
   window.addEventListener('load', () => {
-    document.body.classList.remove('loading');
-    progressBar.style.width = '100%';
+    document.documentElement.classList.remove('loading');
+    document.getElementById('progress-bar').style.width = '100%';
+    setTimeout(() => {
+      document.getElementById('progress').style.opacity = '0';
+    }, 500);
   });
 </script>
 </body>
