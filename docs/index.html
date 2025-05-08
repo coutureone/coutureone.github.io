@@ -10,8 +10,7 @@
   <script>
     // 初始化主题并设置到全局变量
     document.addEventListener('DOMContentLoaded', () => {
-      window.theme = localStorage.getItem('theme') ||
-              (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      window.theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       document.documentElement.setAttribute('data-theme', window.theme);
     });
 
@@ -114,13 +113,8 @@
       --loader-color-4: #00a753;
 
       /* 进度条颜色 */
-      --progress-bg: rgba(0, 0, 0, 0.1); /* 添加浅色背景 */
-      --progress-color: #ffffff; /* 白天模式白色进度条 */
-
-
-      /* 选中文本 */
-      --selection-bg: #b3d4fc;
-      --selection-color: #333333;
+      --progress-bg: rgba(0, 0, 0, 0.1);
+      --progress-color: #ffffff;
     }
 
     [data-theme="dark"] {
@@ -131,8 +125,8 @@
       --border-color: #30363d;
       --shadow-color: rgba(0, 0, 0, 0.3);
 
-      --progress-bg: rgba(255, 255, 255, 0.1); /* 添加深色背景 */
-      --progress-color: #000000; /* 夜间模式黑色进度条 */
+      --progress-bg: rgba(255, 255, 255, 0.1);
+      --progress-color: #000000;
 
       /* 按钮样式 - 暗色模式 */
       --button-bg: #21262d;
@@ -380,46 +374,6 @@
       font-size: 0.9em;
       border: 1px solid var(--code-border);
     }
-
-    /* 主题切换按钮样式 */
-    #theme-toggle {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: var(--button-bg);
-      color: var(--button-text);
-      border: 1px solid var(--button-border);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      transition: all 0.3s ease;
-    }
-
-    #theme-toggle:hover {
-      background: var(--button-hover-bg);
-    }
-
-    #theme-toggle svg {
-      position: absolute;
-      transition: opacity 0.3s ease;
-    }
-
-    #theme-toggle .sun {
-      opacity: 0;
-    }
-
-    [data-theme="dark"] #theme-toggle .moon {
-      opacity: 0;
-    }
-
-    [data-theme="dark"] #theme-toggle .sun {
-      opacity: 1;
-    }
   </style>
 </head>
 <body>
@@ -440,67 +394,8 @@
   </div>
 </div>
 <div id="loader"><div></div><div></div><div></div><div></div></div>
-<button id="theme-toggle">
-  <svg class="moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-  </svg>
-  <svg class="sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-    <circle cx="12" cy="12" r="5"></circle>
-    <line x1="12" y1="1" x2="12" y2="3"></line>
-    <line x1="12" y1="21" x2="12" y2="23"></line>
-    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-    <line x1="1" y1="12" x2="3" y2="12"></line>
-    <line x1="21" y1="12" x2="23" y2="12"></line>
-    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-  </svg>
-</button>
 <script src="./index.92ae90d1.js"></script>
 <script>
-  // 主题切换功能
-  const themeToggle = document.getElementById('theme-toggle');
-
-  // 更新主题图标
-  function updateThemeIcon(theme) {
-    const moonIcon = document.querySelector('.moon');
-    const sunIcon = document.querySelector('.sun');
-    if (theme === 'dark') {
-      moonIcon.style.opacity = 0;
-      sunIcon.style.opacity = 1;
-    } else {
-      moonIcon.style.opacity = 1;
-      sunIcon.style.opacity = 0;
-    }
-  }
-
-  // 主题切换函数
-  function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-
-    // 更新根元素的 data-theme 属性
-    document.documentElement.setAttribute('data-theme', newTheme);
-
-    // 更新 localStorage
-    localStorage.setItem('theme', newTheme);
-
-    // 更新全局变量
-    window.theme = newTheme;
-
-    // 更新主题图标
-    updateThemeIcon(newTheme);
-  }
-
-  // 主题切换按钮事件监听
-  themeToggle.addEventListener('click', toggleTheme);
-
-  // 初始化主题图标
-  document.addEventListener('DOMContentLoaded', () => {
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-    updateThemeIcon(currentTheme);
-  });
-
   // 进度条
   const progressBar = document.getElementById('progress-bar');
 
