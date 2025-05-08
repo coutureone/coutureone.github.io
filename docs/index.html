@@ -51,12 +51,12 @@
     }
   </script>
   <style>
-
-
     body {
-      font-family: "LXGW WenKai Screen", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-family: "LXGW WenKai Screen", sans-serif;
       background-color: var(--bg-color);
       color: var(--text-color);
+      margin: 0;
+      padding: 0;
     }
 
     /* 确保所有文本元素都使用苹方字体 */
@@ -93,25 +93,25 @@
       --bar-border: #d0d7de;
 
       /* 代码块样式 */
-      --code-bg: #f6f8fa;           /* 代码块背景色 */
-      --code-text: #24292e;         /* 代码文本颜色 */
-      --code-border: #e1e4e8;       /* 代码块边框颜色 */
-      --inline-code-bg: #f6f8fa;    /* 行内代码背景色 */
-      --inline-code-text: #24292e;  /* 行内代码文本颜色 */
-      --code-comment: #6e7781;      /* 注释 */
-      --code-keyword: #cf222e;      /* 关键字 */
-      --code-string: #0a3069;       /* 字符串 */
-      --code-number: #0550ae;       /* 数字 */
-      --code-function: #8250df;     /* 函数 */
-      --code-variable: #953800;     /* 变量 */
-      --code-operator: #24292f;     /* 操作符 */
+      --code-bg: #f6f8fa;
+      --code-text: #24292e;
+      --code-border: #e1e4e8;
+      --inline-code-bg: #f6f8fa;
+      --inline-code-text: #24292e;
+      --code-comment: #6e7781;
+      --code-keyword: #cf222e;
+      --code-string: #0a3069;
+      --code-number: #0550ae;
+      --code-function: #8250df;
+      --code-variable: #953800;
+      --code-operator: #24292f;
 
       /* 加载进度条颜色 */
       --loader-bg: rgba(255, 255, 255, .95);
-      --loader-color-1: #0089fa;    /* 蓝色 */
-      --loader-color-2: #ff002b;    /* 红色 */
-      --loader-color-3: #ffa900;    /* 黄色 */
-      --loader-color-4: #00a753;    /* 绿色 */
+      --loader-color-1: #0089fa;
+      --loader-color-2: #ff002b;
+      --loader-color-3: #ffa900;
+      --loader-color-4: #00a753;
 
       /* 进度条颜色 */
       --progress-bg: transparent;
@@ -147,21 +147,36 @@
       --bar-border: #30363d;
 
       /* 代码块样式 */
-      --code-bg: #161b22;           /* 更深的背景色 */
-      --code-text: #e6edf3;         /* 更亮的文本 */
+      --code-bg: #161b22;
+      --code-text: #e6edf3;
       --code-border: #30363d;
-      --code-comment: #8b949e;      /* 注释 */
-      --code-keyword: #ff7b72;      /* 关键字 */
-      --code-string: #a5d6ff;       /* 字符串 */
-      --code-number: #79c0ff;       /* 数字 */
-      --code-function: #d2a8ff;     /* 函数 */
-      --code-variable: #ffa657;     /* 变量 */
-      --code-operator: #e6edf3;     /* 操作符 */
+      --code-comment: #8b949e;
+      --code-keyword: #ff7b72;
+      --code-string: #a5d6ff;
+      --code-number: #79c0ff;
+      --code-function: #d2a8ff;
+      --code-variable: #ffa657;
+      --code-operator: #e6edf3;
     }
 
     /* 全局过渡效果 */
     * {
       transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+
+    /* 按钮基础样式 - 使用CSS变量 */
+    button, input[type="button"], .button {
+      padding: 6px 12px;
+      background-color: var(--button-bg);
+      color: var(--button-text);
+      border: 1px solid var(--button-border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button:hover, input[type="button"]:hover, .button:hover {
+      background-color: var(--button-hover-bg);
     }
 
     /* 统一边框样式 */
@@ -180,7 +195,6 @@
     /* 补充文章内容的样式 */
     .single .post {
       background-color: var(--post-bg);
-      transition: background-color 0.3s ease, color 0.3s ease;
       color: var(--post-content);
     }
 
@@ -210,35 +224,6 @@
 
     .single .post hr {
       border-color: var(--border-color);
-    }
-
-    /* 用户信息和导航样式 */
-    #user {
-      border-color: var(--border-color);
-    }
-
-    .avatar {
-      border-color: var(--border-color);
-    }
-
-    /* 评论区样式 */
-    .comments {
-      background-color: var(--post-bg);
-      border-color: var(--border-color);
-    }
-
-    .comment-meta {
-      color: var(--post-time);
-    }
-
-    body {
-      font-family: "LxgwWenkaiGB", sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-    }
-
-    h1, h2, h3 {
-      font-family: "LxgwWenkaiGB", serif;
     }
 
     /* 加载状态样式 */
@@ -335,34 +320,22 @@
       border-color: var(--bar-border);
     }
 
-    /* 文章详情页样式 */
-    .single #post {
-      background-color: var(--post-bg);
-      color: var(--post-content);
+    /* 进度条样式 */
+    #progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--progress-bg);
+      z-index: 9999;
     }
 
-    .single #post .title {
-      color: var(--post-title);
-    }
-
-    .single #post .time {
-      color: var(--post-time);
-    }
-
-    /* 代码块样式 */
-    .single #post pre {
-      background-color: var(--code-bg);
-      border-color: var(--border-color);
-    }
-
-    .single #post code {
-      color: var(--code-text);
-    }
-
-    /* 评论区样式 */
-    #comments {
-      background-color: var(--post-bg);
-      border-color: var(--border-color);
+    #progress-bar {
+      width: 0;
+      height: 100%;
+      background: var(--progress-color);
+      transition: width 0.2s ease;
     }
 
     /* 代码块基础样式 */
@@ -396,119 +369,59 @@
 
     /* 行内代码样式 */
     :not(pre) > code {
-      background: var(--code-bg);
-      color: var(--code-text);
+      background: var(--inline-code-bg);
+      color: var(--inline-code-text);
       padding: 2px 6px;
       border-radius: 4px;
       font-size: 0.9em;
       border: 1px solid var(--code-border);
     }
 
-    /* 代码块滚动条样式 */
-    pre::-webkit-scrollbar {
-      height: 8px;
-      background-color: var(--code-bg);
-    }
-
-    pre::-webkit-scrollbar-thumb {
-      background-color: var(--border-color);
-      border-radius: 4px;
-    }
-
-    /* 平滑过渡 */
-    body, .card, .post, .bar {
-      transition: all 0.3s ease;
-    }
-
-    /* 进度条样式 */
-    #progress {
+    /* 主题切换按钮样式 */
+    #theme-toggle {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: var(--progress-bg);
-      z-index: 9999;
-    }
-
-    #progress-bar {
-      width: 0;
-      height: 100%;
-      background: var(--progress-color);
-      transition: width 0.2s ease;
-    }
-
-    /* 按钮基础样式 */
-    button, input[type="button"] {
-      padding: 6px 12px;
+      bottom: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
       background: var(--button-bg);
       color: var(--button-text);
       border: 1px solid var(--button-border);
-      border-radius: 6px;
       cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    button:hover, input[type="button"]:hover {
-      background: var(--button-hover-bg);
-    }
-
-    /* 评论按钮样式 */
-    .comment-button {
-      background: var(--card-bg);
-      color: var(--text-color);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      padding: 8px 16px;
-      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
       transition: all 0.3s ease;
     }
 
-    .comment-button:hover {
-      background: var(--border-color);
-      color: var(--text-color);
+    #theme-toggle:hover {
+      background: var(--button-hover-bg);
     }
 
-    /* 代码块和内容背景 */
-    .post-content {
-      background: var(--post-bg);
-      border-radius: 6px;
-      padding: 20px;
-      margin: 20px 0;
+    #theme-toggle svg {
+      position: absolute;
+      transition: opacity 0.3s ease;
     }
 
-    pre {
-      background: var(--code-bg);
-      border: 1px solid var(--code-border);
-      border-radius: 6px;
-      padding: 16px;
-      margin: 16px 0;
-      overflow-x: auto;
+    #theme-toggle .sun {
+      opacity: 0;
     }
 
-    code {
-      font-family: 'JetBrains Mono', monospace;
-      color: var(--code-text);
+    [data-theme="dark"] #theme-toggle .moon {
+      opacity: 0;
     }
 
-    /* 标签样式 */
-    .tag {
-      background: var(--card-bg);
-      color: var(--text-color);
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      padding: 4px 8px;
-      font-size: 0.9em;
-    }
-
-    /* 确保所有元素使用变量 */
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-color);
+    [data-theme="dark"] #theme-toggle .sun {
+      opacity: 1;
     }
   </style>
 </head>
 <body>
+<div id="progress">
+  <div id="progress-bar"></div>
+</div>
 <div id="bar"></div>
 <div class="page home" style="background: var(--bg-color);">
   <div>
@@ -523,16 +436,26 @@
   </div>
 </div>
 <div id="loader"><div></div><div></div><div></div><div></div></div>
+<button id="theme-toggle">
+  <svg class="moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+  <svg class="sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+</button>
 <script src="./index.92ae90d1.js"></script>
 <script>
-  // 主题切换
+  // 主题切换功能
   const themeToggle = document.getElementById('theme-toggle');
-  const body = document.body;
-
-  // 获取当前主题
-  const currentTheme = localStorage.getItem('theme') || 'light';
-  body.setAttribute('data-theme', currentTheme);
-  updateThemeIcon(currentTheme);
 
   // 更新主题图标
   function updateThemeIcon(theme) {
@@ -546,26 +469,35 @@
       sunIcon.style.opacity = 0;
     }
   }
-  // 修改主题切换事件监听器
-  themeToggle.addEventListener('click', () => {
+
+  // 主题切换函数
+  function toggleTheme() {
     const currentTheme = document.documentElement.getAttribute('data-theme');
     const newTheme = currentTheme === 'light' ? 'dark' : 'light';
 
-    // 更新所有相关位置
+    // 更新根元素的 data-theme 属性
     document.documentElement.setAttribute('data-theme', newTheme);
-    window.theme = newTheme; // 更新全局变量
-    localStorage.setItem('theme', newTheme);
-    updateThemeIcon(newTheme);
 
-    // 强制重新应用过渡
-    document.documentElement.style.transition = 'all 0.3s ease';
-    setTimeout(() => {
-      document.documentElement.style.transition = '';
-    }, 300);
+    // 更新 localStorage
+    localStorage.setItem('theme', newTheme);
+
+    // 更新全局变量
+    window.theme = newTheme;
+
+    // 更新主题图标
+    updateThemeIcon(newTheme);
+  }
+
+  // 主题切换按钮事件监听
+  themeToggle.addEventListener('click', toggleTheme);
+
+  // 初始化主题图标
+  document.addEventListener('DOMContentLoaded', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    updateThemeIcon(currentTheme);
   });
 
   // 进度条
-  const progress = document.getElementById('progress');
   const progressBar = document.getElementById('progress-bar');
 
   window.addEventListener('scroll', () => {
@@ -578,24 +510,6 @@
   window.addEventListener('load', () => {
     document.body.classList.remove('loading');
     progressBar.style.width = '100%';
-  });
-
-  // 确保所有按钮使用正确的主题颜色
-  window.addEventListener('load', () => {
-    const buttons = document.querySelectorAll('button, input[type="button"]');
-    buttons.forEach(button => {
-      button.style.backgroundColor = 'var(--button-bg)';
-      button.style.color = 'var(--button-text)';
-      button.style.border = '1px solid var(--button-border)';
-    });
-  });
-
-  // 代码块样式
-  document.querySelectorAll('pre code').forEach(block => {
-    block.style.backgroundColor = 'var(--code-bg)';
-    block.style.color = 'var(--code-text)';
-    block.style.borderRadius = '6px';
-    block.style.padding = '1em';
   });
 </script>
 </body>
