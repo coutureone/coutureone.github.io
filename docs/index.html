@@ -43,6 +43,11 @@
       font-style: normal;
     }
 
+    /* 全局字体设置 */
+    * {
+      font-family: "LXGW WenKai Screen", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif !important;
+    }
+
     body {
       font-family: "LXGW WenKai Screen", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
       background-color: var(--bg-color);
@@ -51,8 +56,13 @@
       padding: 0;
     }
 
-    h1, h2, h3, h4, h5, h6, p, span, a, li, div {
-      font-family: "LXGW WenKai Screen", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    h1, h2, h3, h4, h5, h6, p, span, a, li, div, input, button, textarea, select {
+      font-family: "LXGW WenKai Screen", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif !important;
+    }
+
+    /* GitHub Markdown内容强制使用自定义字体 */
+    .markdown-body, .markdown-body * {
+      font-family: "LXGW WenKai Screen", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif !important;
     }
 
     pre, code {
@@ -437,6 +447,7 @@
           button.style.setProperty('line-height', '1.2', 'important');
           button.style.setProperty('text-decoration', 'none', 'important');
           button.style.setProperty('min-height', '32px', 'important');
+          button.style.setProperty('font-family', '"LXGW WenKai Screen", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif', 'important');
         }
       });
 
@@ -445,6 +456,18 @@
       contentAreas.forEach(area => {
         area.style.backgroundColor = this.currentTheme === 'dark' ? '#0d1117' : '#ffffff';
         area.style.color = this.currentTheme === 'dark' ? '#c9d1d9' : '#24292f';
+      });
+
+      // 强制所有文本元素使用自定义字体
+      this.enforceGlobalFont();
+    }
+
+    enforceGlobalFont() {
+      const allTextElements = document.querySelectorAll('*:not(pre):not(code)');
+      allTextElements.forEach(element => {
+        if (element.tagName !== 'PRE' && element.tagName !== 'CODE') {
+          element.style.setProperty('font-family', '"LXGW WenKai Screen", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif', 'important');
+        }
       });
     }
 
@@ -501,6 +524,8 @@
     if (window.themeManager) {
       window.themeManager.updateAllButtons();
       window.themeManager.applyTheme(window.themeManager.currentTheme);
+      // 强制应用字体
+      window.themeManager.enforceGlobalFont();
     }
   });
 
@@ -587,7 +612,7 @@
               }, 100);
             });
 
-            // 清理Loading文字并更新主题
+            // 清理Loading文字并更新主题和字体
             setTimeout(() => {
               const allElements = document.querySelectorAll('*');
               allElements.forEach(el => {
@@ -599,6 +624,7 @@
 
               if (window.themeManager) {
                 window.themeManager.updateAllButtons();
+                window.themeManager.enforceGlobalFont();
               }
             }, 100);
           }
@@ -609,10 +635,11 @@
 
   observer.observe(document.body, { childList: true, subtree: true });
 
-  // 清理Loading文字
+  // 清理Loading文字并确保字体生效
   window.addEventListener('load', () => {
     setTimeout(() => {
-      const cleanupLoading = () => {
+      const cleanupAndEnforce = () => {
+        // 清理Loading文字
         const allElements = document.querySelectorAll('*');
         allElements.forEach(el => {
           const text = el.textContent ? el.textContent.trim() : '';
@@ -620,14 +647,26 @@
             el.remove();
           }
         });
+
+        // 强制应用字体
+        if (window.themeManager) {
+          window.themeManager.enforceGlobalFont();
+        }
       };
 
-      cleanupLoading();
+      cleanupAndEnforce();
 
-      // 持续清理2秒
-      const interval = setInterval(cleanupLoading, 500);
-      setTimeout(() => clearInterval(interval), 2000);
+      // 持续清理和强制应用3秒
+      const interval = setInterval(cleanupAndEnforce, 500);
+      setTimeout(() => clearInterval(interval), 3000);
     }, 100);
+  });
+
+  // 字体加载完成后立即应用
+  document.fonts.ready.then(() => {
+    if (window.themeManager) {
+      window.themeManager.enforceGlobalFont();
+    }
   });
 </script>
 </body>
