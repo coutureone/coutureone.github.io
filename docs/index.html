@@ -7,7 +7,8 @@
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title> Couture's Blog </title>
   <!-- 直接引入 LXGW WenKai Screen 字体 -->
-  <link rel="preload" href="https://chinese-fonts-cdn.deno.dev/packages/lywkpmydb/dist/LXGWWenKaiScreen/font.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.1.0/style.css" as="style">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.1.0/style.css">
   <!-- Mermaid CDN for diagram support -->
   <script src="https://cdn.jsdelivr.net/npm/mermaid@8.6.4/dist/mermaid.min.js"></script>
 
@@ -25,15 +26,6 @@
     }
   </script>
   <style>
-    /* 直接定义字体 */
-    @font-face {
-      font-family: "LXGW WenKai Screen";
-      src: url("https://chinese-fonts-cdn.deno.dev/packages/lywkpmydb/dist/LXGWWenKaiScreen/font.woff2") format("woff2");
-      font-display: swap;
-      font-weight: normal;
-      font-style: normal;
-    }
-
     /* JetBrains Mono 代码字体 */
     @font-face {
       font-family: "JetBrains Mono";
@@ -49,7 +41,7 @@
     }
 
     body {
-      font-family: "LXGW WenKai Screen", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-family: "LXGW WenKai Screen", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif !important;
       background-color: var(--bg-color);
       color: var(--text-color);
       margin: 0;
@@ -61,7 +53,12 @@
     }
 
     /* GitHub Markdown内容强制使用自定义字体 */
-    .markdown-body, .markdown-body * {
+    .markdown-body, .markdown-body *, .markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6, .markdown-body p, .markdown-body span, .markdown-body a, .markdown-body li, .markdown-body div {
+      font-family: "LXGW WenKai Screen", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif !important;
+    }
+
+    /* 用户信息区域 */
+    #user, #user *, #posts, #posts *, #post, #post *, #comments, #comments * {
       font-family: "LXGW WenKai Screen", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif !important;
     }
 
@@ -463,10 +460,23 @@
     }
 
     enforceGlobalFont() {
-      const allTextElements = document.querySelectorAll('*:not(pre):not(code)');
-      allTextElements.forEach(element => {
-        if (element.tagName !== 'PRE' && element.tagName !== 'CODE') {
-          element.style.setProperty('font-family', '"LXGW WenKai Screen", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif', 'important');
+      // 强制应用字体到所有文本元素
+      const allElements = document.querySelectorAll('*');
+      const fontFamily = '"LXGW WenKai Screen", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif';
+
+      allElements.forEach(element => {
+        if (element.tagName !== 'PRE' && element.tagName !== 'CODE' &&
+                !element.closest('pre') && !element.closest('code')) {
+          element.style.setProperty('font-family', fontFamily, 'important');
+        }
+      });
+
+      // 特别处理GitHub Markdown内容
+      const markdownElements = document.querySelectorAll('.markdown-body, .markdown-body *');
+      markdownElements.forEach(element => {
+        if (element.tagName !== 'PRE' && element.tagName !== 'CODE' &&
+                !element.closest('pre') && !element.closest('code')) {
+          element.style.setProperty('font-family', fontFamily, 'important');
         }
       });
     }
