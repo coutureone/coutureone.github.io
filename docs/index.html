@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" class="loading">
 <head>
-<meta charset="UTF-8" />
+  <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="shortcut icon" href="https://fav.farm/👨🏻‍💻" />
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -384,28 +384,33 @@
   window.themeManager = new ThemeManager();
 
   // 主题切换按钮事件
-  const themeToggle = document.getElementById('theme-toggle');
-  if (themeToggle) {
-    themeToggle.addEventListener('click', () => {
-      if (window.themeManager) {
-        window.themeManager.toggleTheme();
-      }
-    });
+  document.addEventListener('DOMContentLoaded', () => {
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+      themeToggle.addEventListener('click', () => {
+        if (window.themeManager) {
+          window.themeManager.toggleTheme();
+        }
+      });
 
-    // 双击恢复跟随系统主题
-    themeToggle.addEventListener('dblclick', () => {
-      if (window.themeManager) {
-        window.themeManager.clearThemePreference();
-      }
-    });
-  }
+      themeToggle.addEventListener('dblclick', () => {
+        if (window.themeManager) {
+          window.themeManager.clearThemePreference();
+        }
+      });
+    }
+  });
 
   // 进度条
-  const progressBar = document.getElementById('progress-bar');
-  window.addEventListener('scroll', () => {
-    const windowHeight = document.documentElement.scrollHeight - window.innerHeight;
-    const scrolled = (window.scrollY / windowHeight) * 100;
-    progressBar.style.width = scrolled + '%';
+  window.addEventListener('DOMContentLoaded', () => {
+    const progressBar = document.getElementById('progress-bar');
+    if (progressBar) {
+      window.addEventListener('scroll', () => {
+        const windowHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = (window.scrollY / windowHeight) * 100;
+        progressBar.style.width = scrolled + '%';
+      });
+    }
   });
 
   // 页面加载
@@ -426,10 +431,11 @@
     });
   }
 
-  // Mermaid渲染器
+  // 简化的Mermaid渲染器 - 只在HTML中定义一次
   class MermaidRenderer {
     constructor() {
       this.initialized = false;
+      this.processedElements = new Set();
       this.init();
     }
 
@@ -448,9 +454,15 @@
       
       for (let i = 0; i < allPres.length; i++) {
         const block = allPres[i];
+        
+        // 避免重复处理同一个元素
+        if (this.processedElements.has(block)) continue;
+        
         const text = (block.textContent || block.innerText || '').trim();
         
         if (this.isMermaidCode(text)) {
+          this.processedElements.add(block);
+          
           try {
             const graphDiv = document.createElement('div');
             graphDiv.className = 'mermaid-diagram';
@@ -463,7 +475,7 @@
               block.parentNode.removeChild(block);
             }
           } catch (error) {
-            // 静默处理错误
+            console.error('Mermaid render error:', error);
           }
         }
       }
@@ -477,7 +489,7 @@
 
   window.mermaidRenderer = new MermaidRenderer();
 
-  // 监听DOM变化
+  // 监听DOM变化 - 只处理新内容
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       if (mutation.type === 'childList') {
