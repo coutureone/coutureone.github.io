@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" class="loading">
 <head>
-  <meta charset="UTF-8" />
+<meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="shortcut icon" href="https://fav.farm/👨🏻‍💻" />
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -9,141 +9,7 @@
   <link rel="stylesheet" href="https://chinese-fonts-cdn.deno.dev/packages/lywkpmydb/dist/LXGWWenKaiScreen/result.css">
   <!-- Mermaid CDN for diagram support -->
   <script src="https://cdn.jsdelivr.net/npm/mermaid@8.6.4/dist/mermaid.min.js"></script>
-  <script>
-    // 主题管理系统
-    class ThemeManager {
-      constructor() {
-        this.darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        this.currentTheme = this.getInitialTheme();
-        this.init();
-      }
-
-      getInitialTheme() {
-        // 优先使用用户保存的主题，否则跟随系统主题
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
-          return savedTheme;
-        }
-        return this.darkModeQuery.matches ? 'dark' : 'light';
-      }
-
-      init() {
-        // 设置初始主题
-        this.applyTheme(this.currentTheme);
-
-        // 监听系统主题变化
-        this.darkModeQuery.addListener((e) => {
-          // 只有在用户没有手动设置主题时才自动跟随系统
-          if (!localStorage.getItem('theme')) {
-            const newTheme = e.matches ? 'dark' : 'light';
-            this.applyTheme(newTheme);
-          }
-        });
-
-        // 监听页面加载完成
-        document.addEventListener('DOMContentLoaded', () => {
-          this.applyTheme(this.currentTheme);
-        });
-      }
-
-      applyTheme(theme) {
-        this.currentTheme = theme;
-        window.theme = theme;
-        document.documentElement.setAttribute('data-theme', theme);
-
-        // 更新主题切换按钮图标
-        this.updateThemeIcon(theme);
-
-        // 强制更新所有按钮样式
-        setTimeout(() => {
-          this.updateAllButtons();
-        }, 100);
-      }
-
-      updateThemeIcon(theme) {
-        const moonIcon = document.querySelector('.moon');
-        const sunIcon = document.querySelector('.sun');
-        if (moonIcon && sunIcon) {
-          if (theme === 'dark') {
-            moonIcon.style.opacity = 0;
-            sunIcon.style.opacity = 1;
-          } else {
-            moonIcon.style.opacity = 1;
-            sunIcon.style.opacity = 0;
-          }
-        }
-      }
-
-      updateAllButtons() {
-        // 更新所有按钮样式，包括动态生成的Previous/Next按钮
-        const buttons = document.querySelectorAll('button, input[type="button"], .button, a.button');
-        buttons.forEach(button => {
-          if (!button.classList.contains('theme-toggle')) {
-            // 强制应用CSS变量
-            button.style.setProperty('background-color', 'var(--button-bg)', 'important');
-            button.style.setProperty('color', 'var(--button-text)', 'important');
-            button.style.setProperty('border', '1px solid var(--button-border)', 'important');
-          }
-        });
-      }
-
-      toggleTheme() {
-        const newTheme = this.currentTheme === 'light' ? 'dark' : 'light';
-        this.applyTheme(newTheme);
-        // 保存用户选择的主题
-        localStorage.setItem('theme', newTheme);
-      }
-
-      // 清除用户主题偏好，恢复跟随系统
-      clearThemePreference() {
-        localStorage.removeItem('theme');
-        const systemTheme = this.darkModeQuery.matches ? 'dark' : 'light';
-        this.applyTheme(systemTheme);
-      }
-    }
-
-    // 创建全局主题管理器
-    window.themeManager = new ThemeManager();
-
-    // 创建一个 MutationObserver 来监听DOM变化
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'childList') {
-          // 当有新元素添加时，更新按钮样式
-          mutation.addedNodes.forEach((node) => {
-            if (node.nodeType === Node.ELEMENT_NODE) {
-              setTimeout(() => {
-                if (window.themeManager) {
-                  window.themeManager.updateAllButtons();
-                }
-              }, 50);
-            }
-          });
-        }
-
-        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-          // 当 loading 类被移除时，重新应用主题
-          if (!document.documentElement.classList.contains('loading')) {
-            if (window.themeManager) {
-              window.themeManager.applyTheme(window.themeManager.currentTheme);
-            }
-          }
-        }
-      });
-    });
-
-    // 开始观察 html 元素和body的变化
-    window.addEventListener('load', () => {
-      observer.observe(document.documentElement, {
-        attributes: true,
-        childList: true,
-        subtree: true
-      });
-      // 确保在页面加载完成后移除 loading 类
-      document.documentElement.classList.remove('loading');
-    });
-  </script>
-
+  
   <script>
     window.config = {
       organization: false,
@@ -166,115 +32,50 @@
       padding: 0;
     }
 
-    /* 确保所有文本元素都使用 LXGW WenKai Screen 字体 */
     h1, h2, h3, h4, h5, h6, p, span, a, li, div {
       font-family: "LXGW WenKai Screen", sans-serif;
     }
 
-    /* 代码和预格式化文本使用等宽字体 */
     pre, code {
       font-family: 'JetBrains Mono', 'Courier New', monospace !important;
     }
 
     :root {
-      /* 基础颜色 */
       --bg-color: #ffffff;
       --text-color: #24292f;
       --link-color: #0969da;
       --border-color: #d0d7de;
-      --selection-bg: #b3d4fc;
-      --selection-color: #333333;
-      --shadow-color: rgba(0, 0, 0, 0.1);
-
-      /* 按钮样式 */
       --button-bg: #f6f8fa;
       --button-text: #24292f;
       --button-border: #d0d7de;
       --button-hover-bg: #f3f4f6;
-
-      /* 内容区域 */
-      --card-bg: #ffffff;
-      --card-border: #d0d7de;
-      --post-bg: #ffffff;
-      --post-title: #24292f;
-      --post-time: #57606a;
-      --post-content: #24292f;
-      --bar-bg: #ffffff;
-      --bar-border: #d0d7de;
-
-      /* 代码块样式 */
       --code-bg: #f6f8fa;
       --code-text: #24292e;
       --code-border: #e1e4e8;
       --inline-code-bg: #f6f8fa;
       --inline-code-text: #24292e;
-      --code-comment: #6e7781;
-      --code-keyword: #cf222e;
-      --code-string: #0a3069;
-      --code-number: #0550ae;
-      --code-function: #8250df;
-      --code-variable: #953800;
-      --code-operator: #24292f;
-
-      /* 加载进度条颜色 */
-      --loader-bg: rgba(255, 255, 255, .95);
-      --loader-color-1: #0089fa;
-      --loader-color-2: #ff002b;
-      --loader-color-3: #ffa900;
-      --loader-color-4: #00a753;
-
-      /* 进度条颜色 */
-      --progress-bg: rgba(0, 0, 0, 0.1);
       --progress-color: #0969da;
     }
 
     [data-theme="dark"] {
-      /* 基础颜色 */
       --bg-color: #0d1117;
       --text-color: #c9d1d9;
       --link-color: #58a6ff;
       --border-color: #30363d;
-      --shadow-color: rgba(0, 0, 0, 0.3);
-
-      --progress-bg: rgba(255, 255, 255, 0.1);
-      --progress-color: #58a6ff;
-
-      /* 按钮样式 - 暗色模式 */
       --button-bg: #21262d;
       --button-text: #c9d1d9;
       --button-border: #30363d;
       --button-hover-bg: #30363d;
-
-      /* 内容区域 - 暗色模式 */
-      --card-bg: #0d1117;
-      --card-border: #30363d;
-      --post-bg: #0d1117;
-      --post-title: #c9d1d9;
-      --post-time: #8b949e;
-      --post-content: #c9d1d9;
-      --bar-bg: #0d1117;
-      --bar-border: #30363d;
-
-      /* 代码块样式 */
       --code-bg: #161b22;
       --code-text: #e6edf3;
       --code-border: #30363d;
-      --code-comment: #8b949e;
-      --code-keyword: #ff7b72;
-      --code-string: #a5d6ff;
-      --code-number: #79c0ff;
-      --code-function: #d2a8ff;
-      --code-variable: #ffa657;
-      --code-operator: #e6edf3;
+      --inline-code-bg: #161b22;
+      --inline-code-text: #e6edf3;
+      --progress-color: #58a6ff;
     }
 
-    /* 全局过渡效果 */
-    * {
-      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-    }
-
-    /* 按钮基础样式 - 使用CSS变量 */
-    button, input[type="button"], .button, a.button {
+    /* 按钮样式 - 完美居中 */
+    button, .button, a.button {
       padding: 6px 12px !important;
       background-color: var(--button-bg) !important;
       color: var(--button-text) !important;
@@ -284,210 +85,71 @@
       transition: all 0.3s ease;
       font-family: inherit;
       text-decoration: none !important;
-      display: inline-block;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
       box-sizing: border-box;
+      line-height: 1.2 !important;
+      min-height: 32px;
+      vertical-align: middle;
     }
 
-    button:hover, input[type="button"]:hover, .button:hover, a.button:hover {
+    button:hover, .button:hover, a.button:hover {
       background-color: var(--button-hover-bg) !important;
       color: var(--button-text) !important;
     }
 
-    /* 特别针对Previous/Next按钮的样式 */
-    #posts .button, #posts a.button {
-      background-color: var(--button-bg) !important;
-      color: var(--button-text) !important;
-      border: 1px solid var(--button-border) !important;
-    }
-
-    #posts .button:hover, #posts a.button:hover {
-      background-color: var(--button-hover-bg) !important;
-    }
-
-    /* 评论区按钮样式 */
-    #comments .button, #comments a.button {
-      background-color: var(--button-bg) !important;
-      color: var(--button-text) !important;
-      border: 1px solid var(--button-border) !important;
-    }
-
-    #comments .button:hover, #comments a.button:hover {
-      background-color: var(--button-hover-bg) !important;
-    }
-
-    /* 统一边框样式 */
-    .card, .post, .bar {
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      overflow: hidden;
-    }
-
-    /* 添加选中文本的样式 */
-    ::selection {
-      background-color: var(--selection-bg);
-      color: var(--selection-color);
-    }
-
-    /* 补充文章内容的样式 */
-    .single .post {
-      background-color: var(--post-bg);
-      color: var(--post-content);
-    }
-
-    .single .post h1,
-    .single .post h2,
-    .single .post h3,
-    .single .post h4,
-    .single .post h5,
-    .single .post h6 {
-      color: var(--post-title);
-    }
-
-    .single .post blockquote {
-      color: var(--post-content);
-      border-left-color: var(--border-color);
-    }
-
-    .single .post code {
-      background-color: var(--inline-code-bg);
-      color: var(--inline-code-text);
-    }
-
-    .single .post pre {
-      background-color: var(--code-bg);
-      color: var(--code-text);
-    }
-
-    .single .post hr {
-      border-color: var(--border-color);
-    }
-
-    /* 加载状态样式 */
-    .loading,
-    .error,
-    .transition {
-      height: 100%;
-    }
-
-    .loading body,
-    .error body,
-    .transition body {
-      height: 100%;
-    }
-
-    /* 加载动画容器 */
-    #loader {
+    /* 主题切换按钮 */
+    .theme-toggle {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: var(--loader-bg);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-
-    .loading #loader {
+      top: 1rem;
+      right: 1rem;
+      width: 32px;
+      height: 32px;
+      padding: 4px;
+      background: transparent !important;
+      border: none !important;
+      cursor: pointer;
+      z-index: 1000;
       display: flex;
-    }
-
-    /* 加载动画 */
-    #loader div {
-      position: absolute;
-      width: 40px;
-      height: 40px;
-      border: 3px solid transparent;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
       border-radius: 50%;
     }
 
-    #loader div:nth-child(1) {
-      border-top-color: var(--loader-color-1);
-      animation: spin 1s linear infinite;
+    .theme-toggle:hover {
+      background: var(--button-hover-bg) !important;
     }
 
-    #loader div:nth-child(2) {
-      width: 55px;
-      height: 55px;
-      border-right-color: var(--loader-color-2);
-      animation: spin 1.2s linear infinite reverse;
-    }
-
-    #loader div:nth-child(3) {
-      width: 70px;
-      height: 70px;
-      border-bottom-color: var(--loader-color-3);
-      animation: spin 1.4s linear infinite;
-    }
-
-    #loader div:nth-child(4) {
-      width: 85px;
-      height: 85px;
-      border-left-color: var(--loader-color-4);
-      animation: spin 1.6s linear infinite reverse;
-    }
-
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    /* 内容区域样式 */
-    #posts .post {
-      background-color: var(--post-bg);
-      border-color: var(--border-color);
-    }
-
-    #posts .post .title {
-      color: var(--post-title);
-    }
-
-    #posts .post .time {
-      color: var(--post-time);
-    }
-
-    #posts .post .preview {
-      color: var(--post-content);
-    }
-
-    #posts .post {
-      border: none;
-    }
-
-    #bar {
-      z-index: 5;
+    .theme-toggle .sun, .theme-toggle .moon {
       position: absolute;
-      box-sizing: border-box;
-      border-right: 10px solid #fff;
-      border-left: 10px solid #fff;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      background: var(--progress-color);
-      transition: all 1s ease;
+      transition: opacity 0.3s ease;
     }
 
-    /* 进度条样式 */
-    #progress {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: var(--progress-bg);
-      z-index: 9999;
+    .theme-toggle .sun { opacity: 0; }
+    .theme-toggle .moon { opacity: 1; }
+
+    [data-theme="dark"] .theme-toggle .sun { opacity: 1; }
+    [data-theme="dark"] .theme-toggle .moon { opacity: 0; }
+
+    /* Mermaid图表样式 */
+    .mermaid-diagram {
+      text-align: center;
+      margin: 20px 0;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: var(--code-bg);
     }
 
-    #progress-bar {
-      width: 0;
-      height: 100%;
-      background: var(--progress-color);
-      transition: width 0.2s ease;
+    .mermaid-diagram svg {
+      max-width: 100%;
+      height: auto;
     }
 
-    /* 代码块基础样式 */
+    /* 代码块样式 */
     pre {
       background: var(--code-bg);
       border: 1px solid var(--code-border);
@@ -508,16 +170,6 @@
       font-family: inherit;
     }
 
-    /* 代码高亮 */
-    .token.comment { color: var(--code-comment); }
-    .token.keyword { color: var(--code-keyword); }
-    .token.string { color: var(--code-string); }
-    .token.number { color: var(--code-number); }
-    .token.function { color: var(--code-function); }
-    .token.variable { color: var(--code-variable); }
-    .token.operator { color: var(--code-operator); }
-
-    /* 行内代码样式 */
     :not(pre) > code {
       background: var(--inline-code-bg);
       color: var(--inline-code-text);
@@ -528,88 +180,94 @@
       font-family: 'JetBrains Mono', 'Courier New', monospace;
     }
 
-    /* 代码块滚动条样式 */
-    pre::-webkit-scrollbar {
-      height: 8px;
-      background-color: var(--code-bg);
-    }
+    /* 加载动画 */
+    .loading, .error, .transition { height: 100%; }
+    .loading body, .error body, .transition body { height: 100%; }
 
-    pre::-webkit-scrollbar-thumb {
-      background-color: var(--border-color);
-      border-radius: 4px;
-    }
-
-    /* 主题切换按钮样式 */
-    .theme-toggle {
+    #loader {
       position: fixed;
-      top: 1rem;
-      right: 1rem;
-      width: 32px;
-      height: 32px;
-      padding: 4px;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      z-index: 1000;
-      display: flex;
-      align-items: center;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, .95);
+      display: none;
       justify-content: center;
-      font-size: 20px;
-      line-height: 1;
-      border-radius: 50%;
-      transition: background-color 0.3s ease;
+      align-items: center;
+      z-index: 9999;
     }
 
-    .theme-toggle:hover {
-      background: var(--button-hover-bg);
-    }
+    .loading #loader { display: flex; }
 
-    .theme-toggle .sun,
-    .theme-toggle .moon {
+    #loader div {
       position: absolute;
-      transition: opacity 0.3s ease;
+      width: 40px;
+      height: 40px;
+      border: 3px solid transparent;
+      border-radius: 50%;
     }
 
-    .theme-toggle .sun {
-      opacity: 0;
+    #loader div:nth-child(1) {
+      border-top-color: #0089fa;
+      animation: spin 1s linear infinite;
     }
 
-    .theme-toggle .moon {
-      opacity: 1;
+    #loader div:nth-child(2) {
+      width: 55px;
+      height: 55px;
+      border-right-color: #ff002b;
+      animation: spin 1.2s linear infinite reverse;
     }
 
-    [data-theme="dark"] .theme-toggle .sun {
-      opacity: 1;
+    #loader div:nth-child(3) {
+      width: 70px;
+      height: 70px;
+      border-bottom-color: #ffa900;
+      animation: spin 1.4s linear infinite;
     }
 
-    [data-theme="dark"] .theme-toggle .moon {
-      opacity: 0;
+    #loader div:nth-child(4) {
+      width: 85px;
+      height: 85px;
+      border-left-color: #00a753;
+      animation: spin 1.6s linear infinite reverse;
     }
 
-    /* Mermaid图表样式 */
-    .mermaid-diagram {
-      text-align: center;
-      margin: 20px 0;
-      padding: 10px;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      background-color: var(--code-bg);
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
 
-    .mermaid-diagram svg {
-      max-width: 100%;
-      height: auto;
+    /* 进度条 */
+    #progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: rgba(0, 0, 0, 0.1);
+      z-index: 9999;
     }
 
-    /* 响应式设计 */
-    @media (max-width: 768px) {
-      .theme-toggle {
-        top: 0.5rem;
-        right: 0.5rem;
-        width: 28px;
-        height: 28px;
-        font-size: 18px;
-      }
+    #progress-bar {
+      width: 0;
+      height: 100%;
+      background: var(--progress-color);
+      transition: width 0.2s ease;
+    }
+
+    #bar {
+      z-index: 5;
+      position: absolute;
+      box-sizing: border-box;
+      border-right: 10px solid #fff;
+      border-left: 10px solid #fff;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--progress-color);
+      transition: all 1s ease;
     }
   </style>
 </head>
@@ -635,8 +293,96 @@
   </div>
 </div>
 <div id="loader"><div></div><div></div><div></div><div></div></div>
-<script src="./index.f4386f65.js"></script>
+<script src="./index.20b5cf50.js"></script>
 <script>
+  // 主题管理系统
+  class ThemeManager {
+    constructor() {
+      this.darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      this.currentTheme = this.getInitialTheme();
+      this.init();
+    }
+
+    getInitialTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
+        return savedTheme;
+      }
+      return this.darkModeQuery.matches ? 'dark' : 'light';
+    }
+
+    init() {
+      this.applyTheme(this.currentTheme);
+      
+      // 监听系统主题变化
+      this.darkModeQuery.addListener((e) => {
+        if (!localStorage.getItem('theme')) {
+          const newTheme = e.matches ? 'dark' : 'light';
+          this.applyTheme(newTheme);
+        }
+      });
+    }
+
+    applyTheme(theme) {
+      this.currentTheme = theme;
+      window.theme = theme;
+      document.documentElement.setAttribute('data-theme', theme);
+      
+      this.updateThemeIcon(theme);
+      
+      setTimeout(() => {
+        this.updateAllButtons();
+      }, 100);
+    }
+
+    updateThemeIcon(theme) {
+      const moonIcon = document.querySelector('.moon');
+      const sunIcon = document.querySelector('.sun');
+      if (moonIcon && sunIcon) {
+        if (theme === 'dark') {
+          moonIcon.style.opacity = 0;
+          sunIcon.style.opacity = 1;
+        } else {
+          moonIcon.style.opacity = 1;
+          sunIcon.style.opacity = 0;
+        }
+      }
+    }
+
+    updateAllButtons() {
+      const buttons = document.querySelectorAll('button, .button, a.button');
+      buttons.forEach(button => {
+        if (!button.classList.contains('theme-toggle')) {
+          button.style.setProperty('background-color', 'var(--button-bg)', 'important');
+          button.style.setProperty('color', 'var(--button-text)', 'important');
+          button.style.setProperty('border', '1px solid var(--button-border)', 'important');
+          button.style.setProperty('border-radius', '6px', 'important');
+          button.style.setProperty('display', 'inline-flex', 'important');
+          button.style.setProperty('align-items', 'center', 'important');
+          button.style.setProperty('justify-content', 'center', 'important');
+          button.style.setProperty('text-align', 'center', 'important');
+          button.style.setProperty('line-height', '1.2', 'important');
+          button.style.setProperty('text-decoration', 'none', 'important');
+          button.style.setProperty('min-height', '32px', 'important');
+        }
+      });
+    }
+
+    toggleTheme() {
+      const newTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+      this.applyTheme(newTheme);
+      localStorage.setItem('theme', newTheme);
+    }
+
+    clearThemePreference() {
+      localStorage.removeItem('theme');
+      const systemTheme = this.darkModeQuery.matches ? 'dark' : 'light';
+      this.applyTheme(systemTheme);
+    }
+  }
+
+  window.themeManager = new ThemeManager();
+
   // 主题切换按钮事件
   const themeToggle = document.getElementById('theme-toggle');
   if (themeToggle) {
@@ -646,41 +392,16 @@
       }
     });
 
-    // 双击主题按钮可以清除用户偏好，恢复跟随系统主题
+    // 双击恢复跟随系统主题
     themeToggle.addEventListener('dblclick', () => {
       if (window.themeManager) {
         window.themeManager.clearThemePreference();
-        // 显示提示
-        const toast = document.createElement('div');
-        toast.style.cssText = `
-          position: fixed;
-          top: 60px;
-          right: 1rem;
-          background: var(--button-bg);
-          color: var(--button-text);
-          padding: 8px 12px;
-          border-radius: 6px;
-          border: 1px solid var(--button-border);
-          font-size: 12px;
-          z-index: 1001;
-          opacity: 0;
-          transition: opacity 0.3s ease;
-        `;
-        toast.textContent = '已恢复跟随系统主题';
-        document.body.appendChild(toast);
-
-        setTimeout(() => toast.style.opacity = '1', 10);
-        setTimeout(() => {
-          toast.style.opacity = '0';
-          setTimeout(() => document.body.removeChild(toast), 300);
-        }, 2000);
       }
     });
   }
 
   // 进度条
   const progressBar = document.getElementById('progress-bar');
-
   window.addEventListener('scroll', () => {
     const windowHeight = document.documentElement.scrollHeight - window.innerHeight;
     const scrolled = (window.scrollY / windowHeight) * 100;
@@ -690,9 +411,6 @@
   // 页面加载
   window.addEventListener('load', () => {
     document.documentElement.classList.remove('loading');
-    progressBar.style.width = '100%';
-
-    // 使用主题管理器更新所有按钮
     if (window.themeManager) {
       window.themeManager.updateAllButtons();
     }
@@ -704,14 +422,11 @@
       startOnLoad: false,
       theme: 'default',
       securityLevel: 'loose',
-      flowchart: {
-        useMaxWidth: true,
-        htmlLabels: true
-      }
+      flowchart: { useMaxWidth: true, htmlLabels: true }
     });
   }
 
-  // 简化的Mermaid渲染器 - 无调试日志，无Loading文字
+  // Mermaid渲染器
   class MermaidRenderer {
     constructor() {
       this.initialized = false;
@@ -719,7 +434,6 @@
     }
 
     init() {
-      if (this.initialized) return;
       if (typeof window.mermaid !== 'undefined') {
         this.initialized = true;
       } else {
@@ -730,113 +444,66 @@
     renderMermaidDiagrams(container) {
       if (!container || !window.mermaid || !this.initialized) return;
 
-      // 只查找pre元素，避免CSS选择器错误
       const allPres = container.querySelectorAll('pre');
-
+      
       for (let i = 0; i < allPres.length; i++) {
         const block = allPres[i];
         const text = (block.textContent || block.innerText || '').trim();
-
-        // 检查是否包含Mermaid关键词
+        
         if (this.isMermaidCode(text)) {
           try {
-            // 创建图表容器
             const graphDiv = document.createElement('div');
             graphDiv.className = 'mermaid-diagram';
-
-            // 生成唯一ID
             const id = `mermaid-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
-            // 直接渲染图表，无Loading状态
             const svgCode = window.mermaid.render(id, text);
             graphDiv.innerHTML = svgCode;
 
-            // 替换原来的代码块
             if (block.parentNode) {
               block.parentNode.insertBefore(graphDiv, block);
               block.parentNode.removeChild(block);
             }
           } catch (error) {
-            // 静默处理错误，保持原代码块
+            // 静默处理错误
           }
         }
       }
     }
 
     isMermaidCode(code) {
-      const mermaidKeywords = [
-        'graph ',
-        'flowchart ',
-        'sequenceDiagram',
-        'classDiagram',
-        'erDiagram',
-        'journey',
-        'gantt',
-        'pie',
-        'gitgraph'
-      ];
-
-      return mermaidKeywords.some(keyword => code.toLowerCase().includes(keyword.toLowerCase()));
+      const keywords = ['graph ', 'flowchart ', 'sequenceDiagram', 'classDiagram'];
+      return keywords.some(keyword => code.toLowerCase().includes(keyword.toLowerCase()));
     }
   }
 
-  // 全局Mermaid渲染器实例
   window.mermaidRenderer = new MermaidRenderer();
 
-  // 监听DOM变化，处理Mermaid图表和按钮主题
-  const observeChanges = new MutationObserver((mutations) => {
+  // 监听DOM变化
+  const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       if (mutation.type === 'childList') {
         mutation.addedNodes.forEach((node) => {
           if (node.nodeType === Node.ELEMENT_NODE) {
-            // 检查新添加的节点是否包含markdown-body
-            const markdownBodies = node.classList && node.classList.contains('markdown-body')
-                    ? [node]
-                    : node.querySelectorAll ? Array.from(node.querySelectorAll('.markdown-body')) : [];
-
+            const markdownBodies = node.classList && node.classList.contains('markdown-body') 
+              ? [node] 
+              : node.querySelectorAll ? Array.from(node.querySelectorAll('.markdown-body')) : [];
+            
             markdownBodies.forEach((body) => {
               setTimeout(() => {
                 if (window.mermaidRenderer) {
                   window.mermaidRenderer.renderMermaidDiagrams(body);
                 }
-              }, 50);
-            });
-
-            // 检查是否有新的按钮需要应用主题
-            const newButtons = node.querySelectorAll ?
-                    Array.from(node.querySelectorAll('button, .button, a.button')) :
-                    (node.classList && (node.classList.contains('button') || node.tagName === 'BUTTON') ? [node] : []);
-
-            if (newButtons.length > 0) {
-              setTimeout(() => {
                 if (window.themeManager) {
                   window.themeManager.updateAllButtons();
                 }
               }, 50);
-            }
+            });
           }
         });
       }
     });
   });
 
-  // 开始观察DOM变化
-  observeChanges.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
-
-  // 页面加载完成后也执行一次渲染
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      const markdownBodies = document.querySelectorAll('.markdown-body');
-      markdownBodies.forEach((body) => {
-        if (window.mermaidRenderer && window.mermaidRenderer.initialized) {
-          window.mermaidRenderer.renderMermaidDiagrams(body);
-        }
-      });
-    }, 200);
-  });
+  observer.observe(document.body, { childList: true, subtree: true });
 </script>
 </body>
 </html>
