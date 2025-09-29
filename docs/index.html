@@ -6,10 +6,11 @@
   <link rel="shortcut icon" href="https://fav.farm/👨🏻‍💻" />
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title> Couture's Blog </title>
-  <link rel="stylesheet" href="https://chinese-fonts-cdn.deno.dev/packages/lywkpmydb/dist/LXGWWenKaiScreen/result.css">
+  <!-- 直接引入 LXGW WenKai Screen 字体 -->
+  <link rel="preload" href="https://chinese-fonts-cdn.deno.dev/packages/lywkpmydb/dist/LXGWWenKaiScreen/font.woff2" as="font" type="font/woff2" crossorigin>
   <!-- Mermaid CDN for diagram support -->
   <script src="https://cdn.jsdelivr.net/npm/mermaid@8.6.4/dist/mermaid.min.js"></script>
-  
+
   <script>
     window.config = {
       organization: false,
@@ -24,8 +25,26 @@
     }
   </script>
   <style>
+    /* 直接定义字体 */
+    @font-face {
+      font-family: "LXGW WenKai Screen";
+      src: url("https://chinese-fonts-cdn.deno.dev/packages/lywkpmydb/dist/LXGWWenKaiScreen/font.woff2") format("woff2");
+      font-display: swap;
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    /* JetBrains Mono 代码字体 */
+    @font-face {
+      font-family: "JetBrains Mono";
+      src: url("https://fonts.gstatic.com/s/jetbrainsmono/v18/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxjPVmUsaaDhw.woff2") format("woff2");
+      font-display: swap;
+      font-weight: 400;
+      font-style: normal;
+    }
+
     body {
-      font-family: "LXGW WenKai Screen", sans-serif;
+      font-family: "LXGW WenKai Screen", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
       background-color: var(--bg-color);
       color: var(--text-color);
       margin: 0;
@@ -33,17 +52,16 @@
     }
 
     h1, h2, h3, h4, h5, h6, p, span, a, li, div {
-      font-family: "LXGW WenKai Screen", sans-serif;
+      font-family: "LXGW WenKai Screen", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
     }
 
     pre, code {
-      font-family: 'JetBrains Mono', 'Courier New', monospace !important;
+      font-family: 'JetBrains Mono', 'SF Mono', Monaco, 'Consolas', 'Liberation Mono', 'Courier New', monospace !important;
     }
 
     :root {
       --bg-color: #ffffff;
       --text-color: #24292f;
-      --link-color: #0969da;
       --border-color: #d0d7de;
       --button-bg: #f6f8fa;
       --button-text: #24292f;
@@ -55,12 +73,13 @@
       --inline-code-bg: #f6f8fa;
       --inline-code-text: #24292e;
       --progress-color: #0969da;
+      --progress-bg: rgba(0, 0, 0, 0.1);
+      --bar-border-color: #ffffff;
     }
 
     [data-theme="dark"] {
       --bg-color: #0d1117;
       --text-color: #c9d1d9;
-      --link-color: #58a6ff;
       --border-color: #30363d;
       --button-bg: #21262d;
       --button-text: #c9d1d9;
@@ -71,7 +90,40 @@
       --code-border: #30363d;
       --inline-code-bg: #161b22;
       --inline-code-text: #e6edf3;
-      --progress-color: #58a6ff;
+      --progress-color: #ffffff;
+      --progress-bg: rgba(255, 255, 255, 0.1);
+      --bar-border-color: #0d1117;
+    }
+
+    /* 全局背景和文字颜色 */
+    html, body {
+      background-color: var(--bg-color) !important;
+      color: var(--text-color) !important;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* 页面容器背景 */
+    .page {
+      background-color: var(--bg-color) !important;
+      color: var(--text-color) !important;
+    }
+
+    /* 内容区域背景 */
+    #user, #posts, #post, #comments {
+      background-color: var(--bg-color) !important;
+      color: var(--text-color) !important;
+    }
+
+    /* Markdown内容区域 */
+    .markdown-body {
+      background-color: var(--bg-color) !important;
+      color: var(--text-color) !important;
+    }
+
+    /* 文章列表项 */
+    #posts .post {
+      background-color: var(--bg-color) !important;
+      color: var(--text-color) !important;
     }
 
     /* 按钮样式 - 完美居中 */
@@ -117,6 +169,7 @@
       justify-content: center;
       font-size: 20px;
       border-radius: 50%;
+      transition: background-color 0.3s ease;
     }
 
     .theme-toggle:hover {
@@ -157,7 +210,7 @@
       padding: 16px;
       margin: 16px 0;
       overflow-x: auto;
-      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      font-family: 'JetBrains Mono', 'SF Mono', Monaco, 'Consolas', 'Liberation Mono', 'Courier New', monospace;
       font-size: 14px;
       line-height: 1.5;
     }
@@ -177,7 +230,7 @@
       border-radius: 4px;
       font-size: 0.9em;
       border: 1px solid var(--code-border);
-      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      font-family: 'JetBrains Mono', 'SF Mono', Monaco, 'Consolas', 'Liberation Mono', 'Courier New', monospace;
     }
 
     /* 加载动画 */
@@ -238,14 +291,28 @@
       to { transform: rotate(360deg); }
     }
 
-    /* 进度条 */
+    /* 进度条样式 */
+    #bar {
+      z-index: 5;
+      position: absolute;
+      box-sizing: border-box;
+      border-right: 10px solid var(--bar-border-color);
+      border-left: 10px solid var(--bar-border-color);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--progress-color);
+      transition: all 1s ease;
+    }
+
     #progress {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 2px;
-      background: rgba(0, 0, 0, 0.1);
+      background: var(--progress-bg);
       z-index: 9999;
     }
 
@@ -256,18 +323,15 @@
       transition: width 0.2s ease;
     }
 
-    #bar {
-      z-index: 5;
-      position: absolute;
-      box-sizing: border-box;
-      border-right: 10px solid #fff;
-      border-left: 10px solid #fff;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      background: var(--progress-color);
-      transition: all 1s ease;
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .theme-toggle {
+        top: 0.5rem;
+        right: 0.5rem;
+        width: 28px;
+        height: 28px;
+        font-size: 18px;
+      }
     }
   </style>
 </head>
@@ -293,7 +357,7 @@
   </div>
 </div>
 <div id="loader"><div></div><div></div><div></div><div></div></div>
-<script src="./index.20b5cf50.js"></script>
+<script src="./index.65644b42.js"></script>
 <script>
   // 主题管理系统
   class ThemeManager {
@@ -313,7 +377,7 @@
 
     init() {
       this.applyTheme(this.currentTheme);
-      
+
       // 监听系统主题变化
       this.darkModeQuery.addListener((e) => {
         if (!localStorage.getItem('theme')) {
@@ -327,12 +391,20 @@
       this.currentTheme = theme;
       window.theme = theme;
       document.documentElement.setAttribute('data-theme', theme);
-      
+      document.body.setAttribute('data-theme', theme);
+
+      // 强制更新页面背景
+      document.body.style.backgroundColor = theme === 'dark' ? '#0d1117' : '#ffffff';
+      document.body.style.color = theme === 'dark' ? '#c9d1d9' : '#24292f';
+
+      // 更新页面容器背景
+      const pages = document.querySelectorAll('.page');
+      pages.forEach(page => {
+        page.style.backgroundColor = theme === 'dark' ? '#0d1117' : '#ffffff';
+      });
+
       this.updateThemeIcon(theme);
-      
-      setTimeout(() => {
-        this.updateAllButtons();
-      }, 100);
+      setTimeout(() => this.updateAllButtons(), 100);
     }
 
     updateThemeIcon(theme) {
@@ -350,6 +422,7 @@
     }
 
     updateAllButtons() {
+      // 更新按钮
       const buttons = document.querySelectorAll('button, .button, a.button');
       buttons.forEach(button => {
         if (!button.classList.contains('theme-toggle')) {
@@ -365,6 +438,13 @@
           button.style.setProperty('text-decoration', 'none', 'important');
           button.style.setProperty('min-height', '32px', 'important');
         }
+      });
+
+      // 更新所有内容区域
+      const contentAreas = document.querySelectorAll('#posts .post, #post, #comments, #user, .markdown-body');
+      contentAreas.forEach(area => {
+        area.style.backgroundColor = this.currentTheme === 'dark' ? '#0d1117' : '#ffffff';
+        area.style.color = this.currentTheme === 'dark' ? '#c9d1d9' : '#24292f';
       });
     }
 
@@ -383,11 +463,12 @@
 
   window.themeManager = new ThemeManager();
 
-  // 主题切换按钮事件
+  // 事件监听
   document.addEventListener('DOMContentLoaded', () => {
     const themeToggle = document.getElementById('theme-toggle');
     if (themeToggle) {
-      themeToggle.addEventListener('click', () => {
+      themeToggle.addEventListener('click', (e) => {
+        e.preventDefault();
         if (window.themeManager) {
           window.themeManager.toggleTheme();
         }
@@ -399,10 +480,7 @@
         }
       });
     }
-  });
 
-  // 进度条
-  window.addEventListener('DOMContentLoaded', () => {
     const progressBar = document.getElementById('progress-bar');
     if (progressBar) {
       window.addEventListener('scroll', () => {
@@ -411,13 +489,18 @@
         progressBar.style.width = scrolled + '%';
       });
     }
+
+    // 立即应用主题
+    if (window.themeManager) {
+      window.themeManager.applyTheme(window.themeManager.currentTheme);
+    }
   });
 
-  // 页面加载
   window.addEventListener('load', () => {
     document.documentElement.classList.remove('loading');
     if (window.themeManager) {
       window.themeManager.updateAllButtons();
+      window.themeManager.applyTheme(window.themeManager.currentTheme);
     }
   });
 
@@ -431,11 +514,11 @@
     });
   }
 
-  // 简化的Mermaid渲染器 - 只在HTML中定义一次
+  // Mermaid渲染器
   class MermaidRenderer {
     constructor() {
       this.initialized = false;
-      this.processedElements = new Set();
+      this.processedElements = new WeakSet();
       this.init();
     }
 
@@ -451,18 +534,15 @@
       if (!container || !window.mermaid || !this.initialized) return;
 
       const allPres = container.querySelectorAll('pre');
-      
-      for (let i = 0; i < allPres.length; i++) {
-        const block = allPres[i];
-        
-        // 避免重复处理同一个元素
+
+      for (const block of allPres) {
         if (this.processedElements.has(block)) continue;
-        
+
         const text = (block.textContent || block.innerText || '').trim();
-        
+
         if (this.isMermaidCode(text)) {
           this.processedElements.add(block);
-          
+
           try {
             const graphDiv = document.createElement('div');
             graphDiv.className = 'mermaid-diagram';
@@ -475,7 +555,7 @@
               block.parentNode.removeChild(block);
             }
           } catch (error) {
-            console.error('Mermaid render error:', error);
+            // 静默处理错误
           }
         }
       }
@@ -489,26 +569,38 @@
 
   window.mermaidRenderer = new MermaidRenderer();
 
-  // 监听DOM变化 - 只处理新内容
+  // DOM变化监听
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       if (mutation.type === 'childList') {
         mutation.addedNodes.forEach((node) => {
           if (node.nodeType === Node.ELEMENT_NODE) {
-            const markdownBodies = node.classList && node.classList.contains('markdown-body') 
-              ? [node] 
-              : node.querySelectorAll ? Array.from(node.querySelectorAll('.markdown-body')) : [];
-            
+            const markdownBodies = node.classList && node.classList.contains('markdown-body')
+                    ? [node]
+                    : node.querySelectorAll ? Array.from(node.querySelectorAll('.markdown-body')) : [];
+
             markdownBodies.forEach((body) => {
               setTimeout(() => {
                 if (window.mermaidRenderer) {
                   window.mermaidRenderer.renderMermaidDiagrams(body);
                 }
-                if (window.themeManager) {
-                  window.themeManager.updateAllButtons();
-                }
-              }, 50);
+              }, 100);
             });
+
+            // 清理Loading文字并更新主题
+            setTimeout(() => {
+              const allElements = document.querySelectorAll('*');
+              allElements.forEach(el => {
+                const text = el.textContent ? el.textContent.trim() : '';
+                if (text === 'Loading' && el.children.length === 0 && el.tagName !== 'TITLE') {
+                  el.remove();
+                }
+              });
+
+              if (window.themeManager) {
+                window.themeManager.updateAllButtons();
+              }
+            }, 100);
           }
         });
       }
@@ -516,6 +608,27 @@
   });
 
   observer.observe(document.body, { childList: true, subtree: true });
+
+  // 清理Loading文字
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      const cleanupLoading = () => {
+        const allElements = document.querySelectorAll('*');
+        allElements.forEach(el => {
+          const text = el.textContent ? el.textContent.trim() : '';
+          if (text === 'Loading' && el.children.length === 0 && el.tagName !== 'TITLE') {
+            el.remove();
+          }
+        });
+      };
+
+      cleanupLoading();
+
+      // 持续清理2秒
+      const interval = setInterval(cleanupLoading, 500);
+      setTimeout(() => clearInterval(interval), 2000);
+    }, 100);
+  });
 </script>
 </body>
 </html>
