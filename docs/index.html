@@ -425,19 +425,7 @@
       window.theme = theme;
       document.documentElement.setAttribute('data-theme', theme);
       document.body.setAttribute('data-theme', theme);
-
-      // 强制更新页面背景
-      document.body.style.backgroundColor = theme === 'dark' ? '#0d1117' : '#ffffff';
-      document.body.style.color = theme === 'dark' ? '#c9d1d9' : '#24292f';
-
-      // 更新页面容器背景
-      const pages = document.querySelectorAll('.page');
-      pages.forEach(page => {
-        page.style.backgroundColor = theme === 'dark' ? '#0d1117' : '#ffffff';
-      });
-
       this.updateThemeIcon(theme);
-      setTimeout(() => this.updateAllButtons(), 100);
     }
 
     updateThemeIcon(theme) {
@@ -452,87 +440,6 @@
           sunIcon.style.opacity = 0;
         }
       }
-    }
-
-    updateAllButtons() {
-      // 更新按钮
-      const buttons = document.querySelectorAll('button, .button, a.button');
-      buttons.forEach(button => {
-        if (!button.classList.contains('theme-toggle')) {
-          button.style.setProperty('background-color', 'var(--button-bg)', 'important');
-          button.style.setProperty('color', 'var(--button-text)', 'important');
-          button.style.setProperty('border', '1px solid var(--button-border)', 'important');
-          button.style.setProperty('border-radius', '6px', 'important');
-          button.style.setProperty('display', 'inline-flex', 'important');
-          button.style.setProperty('align-items', 'center', 'important');
-          button.style.setProperty('justify-content', 'center', 'important');
-          button.style.setProperty('text-align', 'center', 'important');
-          button.style.setProperty('line-height', '1.2', 'important');
-          button.style.setProperty('text-decoration', 'none', 'important');
-          button.style.setProperty('min-height', '32px', 'important');
-          button.style.setProperty('font-family', '"LXGW WenKai Screen", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif', 'important');
-        }
-      });
-
-      // 更新所有内容区域
-      const contentAreas = document.querySelectorAll('#posts .post, #post, #comments, #user, .markdown-body');
-      contentAreas.forEach(area => {
-        area.style.backgroundColor = this.currentTheme === 'dark' ? '#0d1117' : '#ffffff';
-        area.style.color = this.currentTheme === 'dark' ? '#c9d1d9' : '#24292f';
-      });
-
-      // 强制所有文本元素使用自定义字体
-      this.enforceGlobalFont();
-
-      // 强制更新代码块主题
-      this.enforceCodeBlockTheme();
-    }
-
-    enforceGlobalFont() {
-      // 强制应用字体到所有文本元素
-      const allElements = document.querySelectorAll('*');
-      const fontFamily = '"LXGW WenKai Screen", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif';
-
-      allElements.forEach(element => {
-        if (element.tagName !== 'PRE' && element.tagName !== 'CODE' &&
-                !element.closest('pre') && !element.closest('code')) {
-          element.style.setProperty('font-family', fontFamily, 'important');
-        }
-      });
-
-      // 特别处理GitHub Markdown内容
-      const markdownElements = document.querySelectorAll('.markdown-body, .markdown-body *');
-      markdownElements.forEach(element => {
-        if (element.tagName !== 'PRE' && element.tagName !== 'CODE' &&
-                !element.closest('pre') && !element.closest('code')) {
-          element.style.setProperty('font-family', fontFamily, 'important');
-        }
-      });
-
-      // 强制更新代码块主题
-      this.enforceCodeBlockTheme();
-    }
-
-    enforceCodeBlockTheme() {
-      const isDark = this.currentTheme === 'dark';
-      const codeBlocks = document.querySelectorAll('pre, .markdown-body pre, .highlight pre');
-      const inlineCodes = document.querySelectorAll('code, .markdown-body code');
-
-      // 代码块背景和文字
-      codeBlocks.forEach(block => {
-        block.style.setProperty('background-color', isDark ? '#161b22' : '#f6f8fa', 'important');
-        block.style.setProperty('color', isDark ? '#e6edf3' : '#24292e', 'important');
-        block.style.setProperty('border', isDark ? '1px solid #30363d' : '1px solid #e1e4e8', 'important');
-      });
-
-      // 行内代码
-      inlineCodes.forEach(code => {
-        if (!code.closest('pre')) {
-          code.style.setProperty('background-color', isDark ? '#161b22' : '#f6f8fa', 'important');
-          code.style.setProperty('color', isDark ? '#e6edf3' : '#24292e', 'important');
-          code.style.setProperty('border', isDark ? '1px solid #30363d' : '1px solid #e1e4e8', 'important');
-        }
-      });
     }
 
     toggleTheme() {
@@ -586,10 +493,7 @@
   window.addEventListener('load', () => {
     document.documentElement.classList.remove('loading');
     if (window.themeManager) {
-      window.themeManager.updateAllButtons();
       window.themeManager.applyTheme(window.themeManager.currentTheme);
-      // 强制应用字体
-      window.themeManager.enforceGlobalFont();
     }
   });
 
@@ -676,7 +580,7 @@
               }, 100);
             });
 
-            // 清理Loading文字并更新主题和字体
+            // 清理Loading文字
             setTimeout(() => {
               const allElements = document.querySelectorAll('*');
               allElements.forEach(el => {
@@ -685,12 +589,6 @@
                   el.remove();
                 }
               });
-
-              if (window.themeManager) {
-                window.themeManager.updateAllButtons();
-                window.themeManager.enforceGlobalFont();
-                window.themeManager.enforceCodeBlockTheme();
-              }
             }, 100);
           }
         });
@@ -703,7 +601,7 @@
   // 清理Loading文字并确保字体生效
   window.addEventListener('load', () => {
     setTimeout(() => {
-      const cleanupAndEnforce = () => {
+      const cleanup = () => {
         // 清理Loading文字
         const allElements = document.querySelectorAll('*');
         allElements.forEach(el => {
@@ -712,28 +610,14 @@
             el.remove();
           }
         });
-
-        // 强制应用字体和代码块主题
-        if (window.themeManager) {
-          window.themeManager.enforceGlobalFont();
-          window.themeManager.enforceCodeBlockTheme();
-        }
       };
 
-      cleanupAndEnforce();
+      cleanup();
 
-      // 持续清理和强制应用3秒
-      const interval = setInterval(cleanupAndEnforce, 500);
+      // 持续清理
+      const interval = setInterval(cleanup, 500);
       setTimeout(() => clearInterval(interval), 3000);
     }, 100);
-  });
-
-  // 字体加载完成后立即应用
-  document.fonts.ready.then(() => {
-    if (window.themeManager) {
-      window.themeManager.enforceGlobalFont();
-      window.themeManager.enforceCodeBlockTheme();
-    }
   });
 </script>
 </body>
