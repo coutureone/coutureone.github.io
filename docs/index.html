@@ -82,6 +82,7 @@
       --progress-color: #0969da;
       --progress-bg: rgba(0, 0, 0, 0.1);
       --bar-border-color: #ffffff;
+      --mermaid-bg: #f6f8fa;
     }
 
     [data-theme="dark"] {
@@ -100,6 +101,7 @@
       --progress-color: #ffffff;
       --progress-bg: rgba(255, 255, 255, 0.1);
       --bar-border-color: #0d1117;
+      --mermaid-bg: #161b22;
     }
 
     /* 全局背景和文字颜色 */
@@ -196,17 +198,22 @@
 
     /* Mermaid图表样式 */
     .mermaid-diagram {
-      text-align: center;
+      text-align: left;
       margin: 20px 0;
       padding: 10px;
       border: 1px solid var(--border-color);
       border-radius: 6px;
-      background-color: var(--code-bg);
+      background-color: var(--mermaid-bg);
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
     }
 
     .mermaid-diagram svg {
-      max-width: 100%;
+      display: block;
+      max-width: none;
       height: auto;
+      margin: 0 auto;
     }
 
     .mermaid-error {
@@ -503,23 +510,47 @@
   });
 
   window.addEventListener('load', () => {
-    document.documentElement.classList.remove('loading');
+    clearLoadingState();
     if (window.themeManager) {
       window.themeManager.applyTheme(window.themeManager.currentTheme);
     }
   });
 
-  // 初始化 Mermaid
-  if (typeof mermaid !== 'undefined') {
+  function clearLoadingState() {
+    document.documentElement.classList.remove('loading', 'transition');
+    document.body.classList.remove('loading', 'transition');
+    const loader = document.getElementById('loader');
+    if (loader) {
+      loader.style.display = 'none';
+      loader.style.visibility = 'hidden';
+      loader.style.opacity = '0';
+    }
+  }
+
+  function configureMermaid() {
+    if (typeof mermaid === 'undefined') return;
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     mermaid.initialize({
       startOnLoad: false,
-      theme: 'default',
+      theme: isDark ? 'dark' : 'default',
       securityLevel: 'loose',
       flowchart: { useMaxWidth: true, htmlLabels: true },
       themeVariables: {
-        fontFamily: '"LXGW WenKai Screen", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+        fontFamily: '"LXGW WenKai Screen", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        darkMode: isDark,
+        background: isDark ? '#161b22' : '#f6f8fa',
+        mainBkg: isDark ? '#1f2937' : '#eef2ff',
+        secondBkg: isDark ? '#283548' : '#fff7cc',
+        primaryTextColor: isDark ? '#e6edf3' : '#24292f',
+        primaryBorderColor: isDark ? '#8b949e' : '#a78bfa',
+        lineColor: isDark ? '#c9d1d9' : '#57606a'
       }
     });
+  }
+
+  // 初始化 Mermaid
+  if (typeof mermaid !== 'undefined') {
+    configureMermaid();
   }
 
   // Mermaid渲染器
@@ -533,6 +564,7 @@
     init() {
       if (typeof window.mermaid !== 'undefined') {
         this.initialized = true;
+        configureMermaid();
         this.renderAll();
       } else {
         setTimeout(() => this.init(), 100);
@@ -547,6 +579,7 @@
 
     async renderMermaidDiagrams(container) {
       if (!container || !window.mermaid || !this.initialized) return;
+      configureMermaid();
 
       const allPres = container.querySelectorAll('pre');
 
@@ -570,6 +603,8 @@
               block.parentNode.insertBefore(graphDiv, block);
               block.parentNode.removeChild(block);
             }
+            this.fitDiagram(graphDiv);
+            clearLoadingState();
           } catch (error) {
             const errorDiv = document.createElement('div');
             errorDiv.className = 'mermaid-error';
@@ -577,9 +612,28 @@
             if (block.parentNode) {
               block.parentNode.insertBefore(errorDiv, block);
             }
+            clearLoadingState();
           }
         }
       }
+    }
+
+    fitDiagram(graphDiv) {
+      const svg = graphDiv.querySelector('svg');
+      if (!svg) return;
+
+      const viewBox = (svg.getAttribute('viewBox') || '').split(/\s+/).map(Number);
+      const naturalWidth = viewBox.length === 4 && Number.isFinite(viewBox[2])
+        ? Math.ceil(viewBox[2])
+        : Math.ceil(svg.getBoundingClientRect().width);
+      const containerWidth = Math.floor(graphDiv.clientWidth || graphDiv.getBoundingClientRect().width);
+      const readableWidth = Math.min(naturalWidth, Math.max(containerWidth, 1200));
+
+      svg.removeAttribute('width');
+      svg.style.maxWidth = 'none';
+      svg.style.width = naturalWidth > containerWidth ? `${readableWidth}px` : '100%';
+      svg.style.minWidth = '720px';
+      svg.style.height = 'auto';
     }
 
     isMermaidBlock(block, code, text) {
@@ -656,6 +710,7 @@
   window.addEventListener('load', () => {
     setTimeout(() => {
       const cleanup = () => {
+        clearLoadingState();
         // 清理Loading文字
         const allElements = document.querySelectorAll('*');
         allElements.forEach(el => {
