@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="shortcut icon" href="https://fav.farm/👨🏻‍💻" />
-  <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title> Couture's Blog </title>
   <!-- Mermaid CDN for diagram support -->
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
@@ -20,6 +20,9 @@
       ignores: '',
       hash: 'ghp_vzJquNdFWUyuP&sOTI%*KLDljaGPYX$DDY*KYmxvZy54Y291dHVyZS5jYw==',
       perpage: 5,
+      friendLinks: [
+        // { title: '好友博客', url: 'https://example.com' }
+      ],
     }
   </script>
   <style>
@@ -193,11 +196,79 @@
     [data-theme="dark"] .theme-toggle .sun { opacity: 1; }
     [data-theme="dark"] .theme-toggle .moon { opacity: 0; }
 
+    #user .social {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    #user .social a {
+      width: 18px;
+      height: 18px;
+      color: var(--text-color);
+      opacity: 0.62;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    #user .social a:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    #user .social svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+
+    #user .social svg path {
+      fill: currentColor !important;
+    }
+
+    #user .social a[data-friend-link] svg path {
+      fill: none !important;
+      stroke: currentColor;
+    }
+
     /* Mermaid图表样式 */
+    .mermaid-panel {
+      margin: 20px 0;
+    }
+
+    .mermaid-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .mermaid-tool {
+      width: 28px;
+      height: 28px;
+      min-height: 28px;
+      padding: 0 !important;
+      border-radius: 6px !important;
+      color: var(--button-text) !important;
+      background: var(--button-bg) !important;
+      border: 1px solid var(--button-border) !important;
+    }
+
+    .mermaid-tool svg {
+      width: 15px;
+      height: 15px;
+      stroke: currentColor;
+    }
+
     .mermaid-diagram {
       text-align: left;
       width: 100%;
-      margin: 20px 0;
+      margin: 0;
       padding: 10px;
       border: 1px solid var(--border-color);
       border-radius: 6px;
@@ -230,6 +301,29 @@
 
     .mermaid-diagram.is-tall {
       max-height: min(72vh, 760px);
+    }
+
+    .mermaid-panel.is-fullscreen {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      margin: 0;
+      padding: 12px;
+      background: var(--bg-color);
+      box-sizing: border-box;
+    }
+
+    .mermaid-panel.is-fullscreen .mermaid-toolbar {
+      justify-content: flex-end;
+    }
+
+    .mermaid-panel.is-fullscreen .mermaid-diagram {
+      height: calc(100vh - 58px);
+      max-height: none;
+    }
+
+    body.mermaid-fullscreen {
+      overflow: hidden;
     }
 
     .markdown-body .js-render-enrichment-loader,
@@ -298,6 +392,16 @@
       background: var(--inline-code-bg) !important;
       color: var(--inline-code-text) !important;
       border: 1px solid var(--code-border) !important;
+    }
+
+    .markdown-body img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .markdown-body pre {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     /* 高亮代码块 */
@@ -397,6 +501,12 @@
         height: 28px;
         font-size: 18px;
       }
+
+      .mermaid-toolbar {
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 2px;
+      }
     }
   </style>
 </head>
@@ -491,6 +601,7 @@
 
   // 事件监听
   document.addEventListener('DOMContentLoaded', () => {
+    renderFriendLinks();
     const themeToggle = document.getElementById('theme-toggle');
     if (themeToggle) {
       themeToggle.addEventListener('click', (e) => {
@@ -524,6 +635,7 @@
 
   window.addEventListener('load', () => {
     clearLoadingState();
+    renderFriendLinks();
     if (window.themeManager) {
       window.themeManager.applyTheme(window.themeManager.currentTheme);
     }
@@ -540,6 +652,32 @@
     });
     document.querySelectorAll('.js-render-enrichment-loader, .octospinner').forEach((element) => {
       element.remove();
+    });
+  }
+
+  function iconSvg(path) {
+    return `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="${path}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>`;
+  }
+
+  function renderFriendLinks() {
+    const social = document.querySelector('#user .social');
+    const links = ((window.config && window.config.friendLinks) || []).filter((link) => link && link.url);
+    if (!social || !links.length) return;
+
+    const existingUrls = new Set(Array.from(social.querySelectorAll('a[href]')).map((link) => link.href));
+    links.forEach((link) => {
+      const url = new URL(link.url, window.location.href).href;
+      if (existingUrls.has(url)) return;
+
+      const friendLink = document.createElement('a');
+      friendLink.href = url;
+      friendLink.target = '_blank';
+      friendLink.rel = 'noopener noreferrer';
+      friendLink.title = link.title || '好友博客';
+      friendLink.setAttribute('aria-label', link.title || '好友博客');
+      friendLink.dataset.friendLink = 'true';
+      friendLink.innerHTML = iconSvg('M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71');
+      social.appendChild(friendLink);
     });
   }
 
@@ -619,12 +757,14 @@
           try {
             const graphDiv = document.createElement('div');
             graphDiv.className = 'mermaid-diagram';
+            graphDiv.dataset.mermaidSource = text;
             const id = `mermaid-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
             const result = await window.mermaid.render(id, text);
             graphDiv.innerHTML = typeof result === 'string' ? result : result.svg;
+            const panel = this.createDiagramPanel(graphDiv);
 
             if (block.parentNode) {
-              block.parentNode.insertBefore(graphDiv, block);
+              block.parentNode.insertBefore(panel, block);
               block.parentNode.removeChild(block);
             }
             this.applyDiagramTypography(graphDiv);
@@ -659,12 +799,15 @@
         const readableWidth = Math.min(Math.max(naturalWidth, 720), 1200);
         graphDiv.classList.add('is-wide');
         graphDiv.style.setProperty('--mermaid-svg-width', `${readableWidth}px`);
+        graphDiv.dataset.baseWidth = `${readableWidth}`;
       } else {
         graphDiv.classList.remove('is-wide');
         graphDiv.style.removeProperty('--mermaid-svg-width');
         svg.style.width = '100%';
         svg.style.maxWidth = '100%';
+        graphDiv.dataset.baseWidth = `${containerWidth}`;
       }
+      graphDiv.dataset.scale = '1';
 
       requestAnimationFrame(() => {
         const svgHeight = svg.getBoundingClientRect().height;
@@ -674,6 +817,68 @@
           graphDiv.classList.remove('is-tall');
         }
       });
+    }
+
+    createDiagramPanel(graphDiv) {
+      const panel = document.createElement('div');
+      panel.className = 'mermaid-panel';
+
+      const toolbar = document.createElement('div');
+      toolbar.className = 'mermaid-toolbar';
+      toolbar.append(
+        this.createToolButton('放大流程图', 'M12 5v14M5 12h14', () => this.zoomDiagram(graphDiv, 1.18)),
+        this.createToolButton('缩小流程图', 'M5 12h14', () => this.zoomDiagram(graphDiv, 1 / 1.18)),
+        this.createToolButton('适应宽度', 'M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3', () => this.fitDiagram(graphDiv)),
+        this.createToolButton('全屏查看', 'M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3', () => this.toggleFullscreen(panel, graphDiv)),
+        this.createToolButton('复制源码', 'M8 7h8M8 11h8M8 15h5M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2', (button) => this.copyDiagramSource(graphDiv, button))
+      );
+
+      panel.append(toolbar, graphDiv);
+      return panel;
+    }
+
+    createToolButton(label, path, onClick) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'mermaid-tool';
+      button.title = label;
+      button.setAttribute('aria-label', label);
+      button.innerHTML = iconSvg(path);
+      button.addEventListener('click', (event) => {
+        event.preventDefault();
+        onClick(button);
+      });
+      return button;
+    }
+
+    zoomDiagram(graphDiv, factor) {
+      const currentScale = Number(graphDiv.dataset.scale || '1');
+      const nextScale = Math.min(2.4, Math.max(0.55, currentScale * factor));
+      const baseWidth = Number(graphDiv.dataset.baseWidth || graphDiv.clientWidth || 960);
+      graphDiv.dataset.scale = `${nextScale}`;
+      graphDiv.classList.add('is-wide');
+      graphDiv.style.setProperty('--mermaid-svg-width', `${Math.round(baseWidth * nextScale)}px`);
+    }
+
+    toggleFullscreen(panel, graphDiv) {
+      const isFullscreen = panel.classList.toggle('is-fullscreen');
+      document.body.classList.toggle('mermaid-fullscreen', isFullscreen);
+      requestAnimationFrame(() => this.fitDiagram(graphDiv));
+    }
+
+    async copyDiagramSource(graphDiv, button) {
+      const source = graphDiv.dataset.mermaidSource || '';
+      if (!source || !navigator.clipboard) return;
+      try {
+        await navigator.clipboard.writeText(source);
+        const oldTitle = button.title;
+        button.title = '已复制';
+        setTimeout(() => {
+          button.title = oldTitle;
+        }, 1200);
+      } catch (error) {
+        button.title = '复制失败';
+      }
     }
 
     applyDiagramTypography(graphDiv) {
@@ -737,6 +942,7 @@
 
             // 清理Loading文字
             setTimeout(() => {
+              renderFriendLinks();
               const allElements = document.querySelectorAll('*');
               allElements.forEach(el => {
                 const text = el.textContent ? el.textContent.trim() : '';
@@ -758,6 +964,7 @@
     setTimeout(() => {
       const cleanup = () => {
         clearLoadingState();
+        renderFriendLinks();
         // 清理Loading文字
         const allElements = document.querySelectorAll('*');
         allElements.forEach(el => {
