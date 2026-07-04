@@ -23,10 +23,10 @@
     }
   </script>
   <style>
-    /* 全局字体设置：优先使用系统字体，避免远程字体阻塞国内访问 */
+    /* 全局字体设置：参考 running_page 的 IBM Plex，避免远程字体阻塞国内访问 */
     :root {
-      --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-      --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --font-sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     }
 
     * {
@@ -39,6 +39,9 @@
       color: var(--text-color);
       margin: 0;
       padding: 0;
+      text-rendering: optimizeLegibility;
+      -moz-osx-font-smoothing: grayscale;
+      -webkit-font-smoothing: antialiased;
     }
 
     h1, h2, h3, h4, h5, h6, p, span, a, li, div, input, button, textarea, select {
@@ -192,33 +195,33 @@
     /* Mermaid图表样式 */
     .mermaid-diagram {
       text-align: left;
-      width: min(1200px, calc(100vw - 48px));
-      max-width: calc(100vw - 48px);
-      margin: 20px 50%;
+      width: 100%;
+      margin: 20px 0;
       padding: 10px;
       border: 1px solid var(--border-color);
       border-radius: 6px;
-      background-color: var(--mermaid-bg);
+      background-color: var(--mermaid-bg) !important;
       box-sizing: border-box;
-      overflow-x: auto;
-      overflow-y: hidden;
+      overflow: auto;
       -webkit-overflow-scrolling: touch;
-      transform: translateX(-50%);
     }
 
     .mermaid-diagram svg {
       display: block;
-      max-width: none;
+      width: 100%;
+      max-width: 100%;
       height: auto;
       margin: 0 auto;
+      background: transparent !important;
     }
 
-    @media (max-width: 768px) {
-      .mermaid-diagram {
-        width: calc(100vw - 24px);
-        max-width: calc(100vw - 24px);
-        margin-left: 50%;
-      }
+    .mermaid-diagram.is-wide svg {
+      width: var(--mermaid-svg-width, 960px);
+      max-width: none;
+    }
+
+    .mermaid-diagram.is-tall {
+      max-height: min(72vh, 760px);
     }
 
     .mermaid-error {
@@ -363,21 +366,13 @@
       transition: all 1s ease;
     }
 
-    #progress {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: var(--progress-bg);
-      z-index: 9999;
+    #progress,
+    #bar {
+      display: none !important;
     }
 
     #progress-bar {
-      width: 0;
-      height: 100%;
-      background: var(--progress-color);
-      transition: width 0.2s ease;
+      display: none !important;
     }
 
     /* 响应式设计 */
@@ -524,10 +519,12 @@
   function clearLoadingState() {
     document.documentElement.classList.remove('loading', 'transition');
     document.body.classList.remove('loading', 'transition');
-    const loader = document.getElementById('loader');
-    if (loader) {
-      loader.remove();
-    }
+    ['loader', 'progress', 'progress-bar', 'bar'].forEach((id) => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.remove();
+      }
+    });
   }
 
   function configureMermaid() {
@@ -542,11 +539,19 @@
         fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-sans').trim(),
         darkMode: isDark,
         background: isDark ? '#161b22' : '#f6f8fa',
-        mainBkg: isDark ? '#1f2937' : '#eef2ff',
+        primaryColor: isDark ? '#1f2937' : '#ffffff',
+        secondaryColor: isDark ? '#283548' : '#fff7cc',
+        tertiaryColor: isDark ? '#30363d' : '#eef2ff',
+        mainBkg: isDark ? '#1f2937' : '#f6f8ff',
         secondBkg: isDark ? '#283548' : '#fff7cc',
         primaryTextColor: isDark ? '#e6edf3' : '#24292f',
-        primaryBorderColor: isDark ? '#8b949e' : '#a78bfa',
-        lineColor: isDark ? '#c9d1d9' : '#57606a'
+        secondaryTextColor: isDark ? '#e6edf3' : '#24292f',
+        tertiaryTextColor: isDark ? '#e6edf3' : '#24292f',
+        primaryBorderColor: isDark ? '#8b949e' : '#4f46e5',
+        lineColor: isDark ? '#c9d1d9' : '#374151',
+        tertiaryBorderColor: isDark ? '#8b949e' : '#4f46e5',
+        edgeLabelBackground: isDark ? '#161b22' : '#ffffff',
+        noteTextColor: isDark ? '#e6edf3' : '#24292f'
       }
     });
   }
@@ -630,13 +635,28 @@
         ? Math.ceil(viewBox[2])
         : Math.ceil(svg.getBoundingClientRect().width);
       const containerWidth = Math.floor(graphDiv.clientWidth || graphDiv.getBoundingClientRect().width);
-      const readableWidth = Math.min(naturalWidth, Math.max(containerWidth, 1200));
 
       svg.removeAttribute('width');
-      svg.style.maxWidth = 'none';
-      svg.style.width = naturalWidth > containerWidth ? `${readableWidth}px` : '100%';
-      svg.style.minWidth = '720px';
       svg.style.height = 'auto';
+      if (naturalWidth > containerWidth * 1.15) {
+        const readableWidth = Math.min(Math.max(naturalWidth, 720), 1200);
+        graphDiv.classList.add('is-wide');
+        graphDiv.style.setProperty('--mermaid-svg-width', `${readableWidth}px`);
+      } else {
+        graphDiv.classList.remove('is-wide');
+        graphDiv.style.removeProperty('--mermaid-svg-width');
+        svg.style.width = '100%';
+        svg.style.maxWidth = '100%';
+      }
+
+      requestAnimationFrame(() => {
+        const svgHeight = svg.getBoundingClientRect().height;
+        if (svgHeight > Math.min(window.innerHeight * 0.72, 760)) {
+          graphDiv.classList.add('is-tall');
+        } else {
+          graphDiv.classList.remove('is-tall');
+        }
+      });
     }
 
     isMermaidBlock(block, code, text) {
