@@ -627,6 +627,7 @@
               block.parentNode.insertBefore(graphDiv, block);
               block.parentNode.removeChild(block);
             }
+            this.applyDiagramTypography(graphDiv);
             this.fitDiagram(graphDiv);
             clearLoadingState();
           } catch (error) {
@@ -672,6 +673,13 @@
         } else {
           graphDiv.classList.remove('is-tall');
         }
+      });
+    }
+
+    applyDiagramTypography(graphDiv) {
+      const fontStack = getComputedStyle(document.documentElement).getPropertyValue('--font-mermaid').trim();
+      graphDiv.querySelectorAll('svg, svg *, foreignObject, foreignObject *, .label, .label *').forEach((node) => {
+        node.style.setProperty('font-family', fontStack, 'important');
       });
     }
 
