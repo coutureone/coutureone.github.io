@@ -27,6 +27,7 @@
     :root {
       --font-sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
       --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --font-mermaid: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     }
 
     * {
@@ -213,6 +214,7 @@
       height: auto;
       margin: 0 auto;
       background: transparent !important;
+      font-family: var(--font-mermaid) !important;
     }
 
     .mermaid-diagram.is-wide svg {
@@ -544,7 +546,7 @@
       securityLevel: 'loose',
       flowchart: { useMaxWidth: true, htmlLabels: true },
       themeVariables: {
-        fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-sans').trim(),
+        fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font-mermaid').trim(),
         darkMode: isDark,
         background: isDark ? '#161b22' : '#f6f8fa',
         primaryColor: isDark ? '#1f2937' : '#ffffff',
