@@ -10,7 +10,7 @@
   <link rel="preload" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.1.0/style.css" as="style">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.1.0/style.css">
   <!-- Mermaid CDN for diagram support -->
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@8.6.4/dist/mermaid.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
 
   <script>
     window.config = {
@@ -207,6 +207,18 @@
     .mermaid-diagram svg {
       max-width: 100%;
       height: auto;
+    }
+
+    .mermaid-error {
+      margin: 16px 0;
+      padding: 12px;
+      border: 1px solid #f85149;
+      border-radius: 6px;
+      background: rgba(248, 81, 73, 0.08);
+      color: #f85149;
+      font-family: 'JetBrains Mono', 'SF Mono', Monaco, 'Consolas', 'Liberation Mono', 'Courier New', monospace !important;
+      font-size: 13px;
+      white-space: pre-wrap;
     }
 
     /* 代码块样式 - 强制主题应用 */
@@ -503,7 +515,10 @@
       startOnLoad: false,
       theme: 'default',
       securityLevel: 'loose',
-      flowchart: { useMaxWidth: true, htmlLabels: true }
+      flowchart: { useMaxWidth: true, htmlLabels: true },
+      themeVariables: {
+        fontFamily: '"LXGW WenKai Screen", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+      }
     });
   }
 
@@ -518,12 +533,19 @@
     init() {
       if (typeof window.mermaid !== 'undefined') {
         this.initialized = true;
+        this.renderAll();
       } else {
         setTimeout(() => this.init(), 100);
       }
     }
 
-    renderMermaidDiagrams(container) {
+    renderAll() {
+      document.querySelectorAll('.markdown-body').forEach((body) => {
+        this.renderMermaidDiagrams(body);
+      });
+    }
+
+    async renderMermaidDiagrams(container) {
       if (!container || !window.mermaid || !this.initialized) return;
 
       const allPres = container.querySelectorAll('pre');
@@ -531,32 +553,64 @@
       for (const block of allPres) {
         if (this.processedElements.has(block)) continue;
 
-        const text = (block.textContent || block.innerText || '').trim();
+        const code = block.querySelector('code');
+        const text = (code ? code.textContent : block.textContent || block.innerText || '').trim();
 
-        if (this.isMermaidCode(text)) {
+        if (this.isMermaidBlock(block, code, text)) {
           this.processedElements.add(block);
 
           try {
             const graphDiv = document.createElement('div');
             graphDiv.className = 'mermaid-diagram';
             const id = `mermaid-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-            const svgCode = window.mermaid.render(id, text);
-            graphDiv.innerHTML = svgCode;
+            const result = await window.mermaid.render(id, text);
+            graphDiv.innerHTML = typeof result === 'string' ? result : result.svg;
 
             if (block.parentNode) {
               block.parentNode.insertBefore(graphDiv, block);
               block.parentNode.removeChild(block);
             }
           } catch (error) {
-            // 静默处理错误
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'mermaid-error';
+            errorDiv.textContent = `Mermaid render failed:\n${error.message || error}`;
+            if (block.parentNode) {
+              block.parentNode.insertBefore(errorDiv, block);
+            }
           }
         }
       }
     }
 
+    isMermaidBlock(block, code, text) {
+      const lang = [
+        block.getAttribute('lang'),
+        block.getAttribute('data-lang'),
+        code && code.getAttribute('lang'),
+        code && code.getAttribute('data-lang'),
+        code && code.className
+      ].filter(Boolean).join(' ').toLowerCase();
+
+      return lang.includes('mermaid') || this.isMermaidCode(text);
+    }
+
     isMermaidCode(code) {
-      const keywords = ['graph ', 'flowchart ', 'sequenceDiagram', 'classDiagram'];
-      return keywords.some(keyword => code.toLowerCase().includes(keyword.toLowerCase()));
+      const normalized = code.trim().toLowerCase();
+      const keywords = [
+        'graph ',
+        'flowchart ',
+        'sequencediagram',
+        'classdiagram',
+        'statediagram',
+        'erdiagram',
+        'gantt',
+        'pie ',
+        'journey',
+        'mindmap',
+        'timeline',
+        'gitgraph'
+      ];
+      return keywords.some(keyword => normalized.startsWith(keyword));
     }
   }
 
