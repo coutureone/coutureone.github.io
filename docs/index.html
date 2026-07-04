@@ -276,6 +276,7 @@
       box-sizing: border-box;
       overflow: auto;
       -webkit-overflow-scrolling: touch;
+      cursor: zoom-in;
     }
 
     .mermaid-diagram svg {
@@ -295,8 +296,8 @@
     }
 
     .mermaid-diagram.is-wide svg {
-      width: var(--mermaid-svg-width, 960px);
-      max-width: none;
+      width: var(--mermaid-svg-width, 960px) !important;
+      max-width: none !important;
     }
 
     .mermaid-diagram.is-tall {
@@ -308,18 +309,27 @@
       inset: 0;
       z-index: 2000;
       margin: 0;
-      padding: 12px;
+      padding: 14px;
       background: var(--bg-color);
       box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
 
     .mermaid-panel.is-fullscreen .mermaid-toolbar {
       justify-content: flex-end;
+      margin-bottom: 0;
+      flex: 0 0 auto;
     }
 
     .mermaid-panel.is-fullscreen .mermaid-diagram {
-      height: calc(100vh - 58px);
+      flex: 1 1 auto;
+      height: auto;
+      min-height: 0;
       max-height: none;
+      cursor: default;
+      overscroll-behavior: contain;
     }
 
     body.mermaid-fullscreen {
@@ -757,7 +767,9 @@
     constructor() {
       this.initialized = false;
       this.processedElements = new WeakSet();
+      this.activeFullscreen = null;
       this.init();
+      this.bindFullscreenEvents();
     }
 
     init() {
@@ -824,19 +836,23 @@
       const svg = graphDiv.querySelector('svg');
       if (!svg) return;
 
+      const isFullscreen = graphDiv.closest('.mermaid-panel.is-fullscreen');
       const viewBox = (svg.getAttribute('viewBox') || '').split(/\s+/).map(Number);
       const naturalWidth = viewBox.length === 4 && Number.isFinite(viewBox[2])
         ? Math.ceil(viewBox[2])
         : Math.ceil(svg.getBoundingClientRect().width);
       const containerWidth = Math.floor(graphDiv.clientWidth || graphDiv.getBoundingClientRect().width);
+      const wideMaxWidth = isFullscreen ? 2400 : 1200;
 
       svg.removeAttribute('width');
       svg.style.height = 'auto';
-      if (naturalWidth > containerWidth * 1.15) {
-        const readableWidth = Math.min(Math.max(naturalWidth, 720), 1200);
+      if (isFullscreen || naturalWidth > containerWidth * 1.15) {
+        const readableWidth = Math.min(Math.max(naturalWidth, Math.min(containerWidth, 960), 720), wideMaxWidth);
         graphDiv.classList.add('is-wide');
         graphDiv.style.setProperty('--mermaid-svg-width', `${readableWidth}px`);
         graphDiv.dataset.baseWidth = `${readableWidth}`;
+        svg.style.width = `${readableWidth}px`;
+        svg.style.maxWidth = 'none';
       } else {
         graphDiv.classList.remove('is-wide');
         graphDiv.style.removeProperty('--mermaid-svg-width');
@@ -862,13 +878,30 @@
 
       const toolbar = document.createElement('div');
       toolbar.className = 'mermaid-toolbar';
+      const fullscreenButton = this.createToolButton('全屏查看', 'M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3', () => this.toggleFullscreen(panel, graphDiv));
       toolbar.append(
         this.createToolButton('放大流程图', 'M12 5v14M5 12h14', () => this.zoomDiagram(graphDiv, 1.18)),
         this.createToolButton('缩小流程图', 'M5 12h14', () => this.zoomDiagram(graphDiv, 1 / 1.18)),
         this.createToolButton('适应宽度', 'M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3', () => this.fitDiagram(graphDiv)),
-        this.createToolButton('全屏查看', 'M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3', () => this.toggleFullscreen(panel, graphDiv)),
+        fullscreenButton,
         this.createToolButton('复制源码', 'M8 7h8M8 11h8M8 15h5M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2', (button) => this.copyDiagramSource(graphDiv, button))
       );
+
+      panel.fullscreenButton = fullscreenButton;
+      graphDiv.title = '点击全屏查看';
+      graphDiv.setAttribute('role', 'button');
+      graphDiv.setAttribute('tabindex', '0');
+      graphDiv.addEventListener('click', () => {
+        if (!panel.classList.contains('is-fullscreen')) {
+          this.openFullscreen(panel, graphDiv);
+        }
+      });
+      graphDiv.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          this.openFullscreen(panel, graphDiv);
+        }
+      });
 
       panel.append(toolbar, graphDiv);
       return panel;
@@ -883,6 +916,7 @@
       button.innerHTML = iconSvg(path);
       button.addEventListener('click', (event) => {
         event.preventDefault();
+        event.stopPropagation();
         onClick(button);
       });
       return button;
@@ -890,17 +924,97 @@
 
     zoomDiagram(graphDiv, factor) {
       const currentScale = Number(graphDiv.dataset.scale || '1');
-      const nextScale = Math.min(2.4, Math.max(0.55, currentScale * factor));
+      const isFullscreen = graphDiv.closest('.mermaid-panel.is-fullscreen');
+      const maxScale = isFullscreen ? 4 : 2.4;
+      const minScale = isFullscreen ? 0.35 : 0.55;
+      const nextScale = Math.min(maxScale, Math.max(minScale, currentScale * factor));
       const baseWidth = Number(graphDiv.dataset.baseWidth || graphDiv.clientWidth || 960);
       graphDiv.dataset.scale = `${nextScale}`;
       graphDiv.classList.add('is-wide');
-      graphDiv.style.setProperty('--mermaid-svg-width', `${Math.round(baseWidth * nextScale)}px`);
+      const nextWidth = Math.round(baseWidth * nextScale);
+      graphDiv.style.setProperty('--mermaid-svg-width', `${nextWidth}px`);
+      const svg = graphDiv.querySelector('svg');
+      if (svg) {
+        svg.style.width = `${nextWidth}px`;
+        svg.style.maxWidth = 'none';
+      }
     }
 
     toggleFullscreen(panel, graphDiv) {
-      const isFullscreen = panel.classList.toggle('is-fullscreen');
-      document.body.classList.toggle('mermaid-fullscreen', isFullscreen);
+      if (panel.classList.contains('is-fullscreen')) {
+        this.closeFullscreen(panel, graphDiv);
+      } else {
+        this.openFullscreen(panel, graphDiv);
+      }
+    }
+
+    openFullscreen(panel, graphDiv) {
+      if (this.activeFullscreen && this.activeFullscreen.panel !== panel) {
+        this.closeFullscreen(this.activeFullscreen.panel, this.activeFullscreen.graphDiv, { skipBrowserExit: true });
+      }
+      this.movePanelToBody(panel);
+      panel.classList.add('is-fullscreen');
+      document.body.classList.add('mermaid-fullscreen');
+      graphDiv.title = '使用工具栏缩放，按 Esc 退出';
+      this.activeFullscreen = { panel, graphDiv };
+      this.syncFullscreenButton(panel, true);
+      if (panel.requestFullscreen && document.fullscreenElement !== panel) {
+        panel.requestFullscreen().catch(() => {});
+      }
       requestAnimationFrame(() => this.fitDiagram(graphDiv));
+    }
+
+    closeFullscreen(panel, graphDiv, options = {}) {
+      panel.classList.remove('is-fullscreen');
+      document.body.classList.remove('mermaid-fullscreen');
+      graphDiv.title = '点击全屏查看';
+      if (this.activeFullscreen && this.activeFullscreen.panel === panel) {
+        this.activeFullscreen = null;
+      }
+      this.syncFullscreenButton(panel, false);
+      if (!options.skipBrowserExit && document.fullscreenElement === panel && document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+      this.restorePanel(panel);
+      requestAnimationFrame(() => this.fitDiagram(graphDiv));
+    }
+
+    syncFullscreenButton(panel, isFullscreen) {
+      if (!panel.fullscreenButton) return;
+      const label = isFullscreen ? '退出全屏' : '全屏查看';
+      panel.fullscreenButton.title = label;
+      panel.fullscreenButton.setAttribute('aria-label', label);
+    }
+
+    movePanelToBody(panel) {
+      if (panel.fullscreenPlaceholder || panel.parentNode === document.body) return;
+      const placeholder = document.createComment('mermaid-fullscreen-placeholder');
+      panel.parentNode.insertBefore(placeholder, panel);
+      panel.fullscreenPlaceholder = placeholder;
+      document.body.appendChild(panel);
+    }
+
+    restorePanel(panel) {
+      const placeholder = panel.fullscreenPlaceholder;
+      if (!placeholder) return;
+      if (placeholder.parentNode) {
+        placeholder.parentNode.insertBefore(panel, placeholder);
+        placeholder.parentNode.removeChild(placeholder);
+      }
+      panel.fullscreenPlaceholder = null;
+    }
+
+    bindFullscreenEvents() {
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && this.activeFullscreen) {
+          this.closeFullscreen(this.activeFullscreen.panel, this.activeFullscreen.graphDiv);
+        }
+      });
+      document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement && this.activeFullscreen) {
+          this.closeFullscreen(this.activeFullscreen.panel, this.activeFullscreen.graphDiv, { skipBrowserExit: true });
+        }
+      });
     }
 
     async copyDiagramSource(graphDiv, button) {
