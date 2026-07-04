@@ -17,11 +17,16 @@
       user: 'coutureone',
       repository: 'gitblog',
       authors: 'Couture',
+      host: 'blog.xcouture.cc',
       ignores: '',
       hash: 'ghp_vzJquNdFWUyuP&sOTI%*KLDljaGPYX$DDY*KYmxvZy54Y291dHVyZS5jYw==',
       perpage: 5,
-      friendLinks: [
-        // { title: '好友博客', url: 'https://example.com' }
+      socialLinks: [
+        { title: '跑步记录', url: 'https://run.xcouture.cc', icon: 'running' },
+        { title: 'Twitter', url: 'https://twitter.com/coutureone', icon: 'twitter' },
+        { title: 'Telegram', url: 'https://t.me/coutureone', icon: 'telegram' },
+        { title: 'RSS', url: 'https://raw.githubusercontent.com/coutureone/gitblog/master/feed.xml', icon: 'rss' },
+        { title: '友链', url: 'https://github.com/coutureone/gitblog/issues?q=is%3Aissue+%E5%8F%8B%E9%93%BE', icon: 'friends' }
       ],
     }
   </script>
@@ -228,11 +233,6 @@
 
     #user .social svg path {
       fill: currentColor !important;
-    }
-
-    #user .social a[data-friend-link] svg path {
-      fill: none !important;
-      stroke: currentColor;
     }
 
     /* Mermaid图表样式 */
@@ -532,7 +532,7 @@
   </div>
 </div>
 <div id="loader"><div></div><div></div><div></div><div></div></div>
-<script src="./index.7e6605fd.js"></script>
+<script src="./index.6a7632a6.js"></script>
 <script>
   // 主题管理系统
   class ThemeManager {
@@ -653,31 +653,68 @@
     document.querySelectorAll('.js-render-enrichment-loader, .octospinner').forEach((element) => {
       element.remove();
     });
+    normalizeBlogImages();
   }
 
   function iconSvg(path) {
     return `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="${path}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>`;
   }
 
+  function labelExistingSocialLinks(social) {
+    const labels = [
+      { test: href => href.includes('github.com/coutureone'), label: 'GitHub' },
+      { test: href => href.startsWith('mailto:'), label: 'Email' },
+      { test: href => href.includes('run.xcouture.cc'), label: '跑步记录' },
+      { test: href => href.includes('blog.xcouture.cc'), label: '博客首页' }
+    ];
+
+    Array.from(social.querySelectorAll('a[href]')).forEach((anchor) => {
+      const href = anchor.href || anchor.getAttribute('href') || '';
+      const match = labels.find(({ test }) => test(href));
+      if (!match) return;
+      anchor.title = match.label;
+      anchor.setAttribute('aria-label', match.label);
+      if (anchor.target === '_blank') {
+        anchor.rel = 'noopener noreferrer';
+      }
+    });
+  }
+
   function renderFriendLinks() {
     const social = document.querySelector('#user .social');
-    const links = ((window.config && window.config.friendLinks) || []).filter((link) => link && link.url);
-    if (!social || !links.length) return;
+    if (!social) return;
+    labelExistingSocialLinks(social);
+  }
 
-    const existingUrls = new Set(Array.from(social.querySelectorAll('a[href]')).map((link) => link.href));
-    links.forEach((link) => {
-      const url = new URL(link.url, window.location.href).href;
-      if (existingUrls.has(url)) return;
+  function normalizeBlogAssetUrl(url) {
+    if (!url) return url;
+    return url
+      .replace('https://cdn.jsdelivr.net/gh/coutureone/gitblog@main/', 'https://cdn.jsdelivr.net/gh/coutureone/gitblog@master/')
+      .replace('https://raw.githubusercontent.com/coutureone/gitblog/main/', 'https://raw.githubusercontent.com/coutureone/gitblog/master/');
+  }
 
-      const friendLink = document.createElement('a');
-      friendLink.href = url;
-      friendLink.target = '_blank';
-      friendLink.rel = 'noopener noreferrer';
-      friendLink.title = link.title || '好友博客';
-      friendLink.setAttribute('aria-label', link.title || '好友博客');
-      friendLink.dataset.friendLink = 'true';
-      friendLink.innerHTML = iconSvg('M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71');
-      social.appendChild(friendLink);
+  function normalizeBlogImages(root = document) {
+    const images = root.matches && root.matches('img')
+      ? [root]
+      : Array.from(root.querySelectorAll('img'));
+
+    images.forEach((img) => {
+      const canonicalSrc = img.getAttribute('data-canonical-src');
+      const normalizedCanonical = normalizeBlogAssetUrl(canonicalSrc);
+      const currentSrc = img.getAttribute('src');
+      const normalizedSrc = normalizeBlogAssetUrl(currentSrc);
+
+      if (normalizedCanonical && normalizedCanonical !== canonicalSrc) {
+        img.setAttribute('data-canonical-src', normalizedCanonical);
+        img.src = normalizedCanonical;
+      } else if (normalizedSrc && normalizedSrc !== currentSrc) {
+        img.src = normalizedSrc;
+      }
+
+      if (!img.loading) {
+        img.loading = 'lazy';
+      }
+      img.decoding = 'async';
     });
   }
 
@@ -943,6 +980,7 @@
             // 清理Loading文字
             setTimeout(() => {
               renderFriendLinks();
+              normalizeBlogImages(node);
               const allElements = document.querySelectorAll('*');
               allElements.forEach(el => {
                 const text = el.textContent ? el.textContent.trim() : '';
