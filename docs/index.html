@@ -31,15 +31,11 @@
     }
   </script>
   <style>
-    /* 全局字体设置：参考 running_page 的 IBM Plex，避免远程字体阻塞国内访问 */
+    /* Fast local font stack: no remote font downloads. */
     :root {
-      --font-sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-      --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       --font-mermaid: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-    }
-
-    * {
-      font-family: var(--font-sans) !important;
     }
 
     body {
@@ -53,17 +49,15 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    h1, h2, h3, h4, h5, h6, p, span, a, li, div, input, button, textarea, select {
+    input, button, textarea, select {
+      font: inherit;
+    }
+
+    .markdown-body {
       font-family: var(--font-sans) !important;
     }
 
-    /* GitHub Markdown内容强制使用自定义字体 */
-    .markdown-body, .markdown-body *, .markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6, .markdown-body p, .markdown-body span, .markdown-body a, .markdown-body li, .markdown-body div {
-      font-family: var(--font-sans) !important;
-    }
-
-    /* 用户信息区域 */
-    #user, #user *, #posts, #posts *, #post, #post *, #comments, #comments * {
+    #user, #posts, #post, #comments {
       font-family: var(--font-sans) !important;
     }
 
