@@ -78,6 +78,12 @@
       --code-border: #e1e4e8;
       --inline-code-bg: #f6f8fa;
       --inline-code-text: #24292e;
+      --markdown-link-color: #0969da;
+      --table-bg: #ffffff;
+      --table-header-bg: #f6f8fa;
+      --table-row-alt-bg: #f6f8fa;
+      --table-text-color: #24292f;
+      --table-border-color: #d0d7de;
       --progress-color: #0969da;
       --progress-bg: rgba(0, 0, 0, 0.1);
       --bar-border-color: #ffffff;
@@ -98,6 +104,12 @@
       --code-border: #30363d;
       --inline-code-bg: #161b22;
       --inline-code-text: #e6edf3;
+      --markdown-link-color: #58a6ff;
+      --table-bg: #0d1117;
+      --table-header-bg: #161b22;
+      --table-row-alt-bg: #161b22;
+      --table-text-color: #c9d1d9;
+      --table-border-color: #30363d;
       --progress-color: #ffffff;
       --progress-bg: rgba(255, 255, 255, 0.1);
       --bar-border-color: #0d1117;
@@ -128,6 +140,18 @@
     .markdown-body {
       background-color: var(--bg-color) !important;
       color: var(--text-color) !important;
+      --color-fg-default: var(--text-color);
+      --color-canvas-default: var(--bg-color);
+      --color-canvas-subtle: var(--table-row-alt-bg);
+      --color-border-default: var(--border-color);
+      --color-border-muted: var(--border-color);
+      --color-accent-fg: var(--markdown-link-color);
+      --fgColor-default: var(--text-color);
+      --fgColor-accent: var(--markdown-link-color);
+      --bgColor-default: var(--bg-color);
+      --bgColor-muted: var(--table-row-alt-bg);
+      --borderColor-default: var(--border-color);
+      --borderColor-muted: var(--border-color);
     }
 
     /* 文章列表项 */
@@ -410,6 +434,43 @@
       background: var(--inline-code-bg) !important;
       color: var(--inline-code-text) !important;
       border: 1px solid var(--code-border) !important;
+    }
+
+    .markdown-body table {
+      display: block;
+      width: max-content;
+      max-width: 100%;
+      margin: 16px 0;
+      overflow-x: auto;
+      border-spacing: 0;
+      border-collapse: collapse;
+      color: var(--table-text-color) !important;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .markdown-body table tr {
+      background: var(--table-bg) !important;
+      border-top: 1px solid var(--table-border-color) !important;
+    }
+
+    .markdown-body table tr:nth-child(2n) {
+      background: var(--table-row-alt-bg) !important;
+    }
+
+    .markdown-body table th,
+    .markdown-body table td {
+      padding: 6px 13px;
+      border: 1px solid var(--table-border-color) !important;
+      color: var(--table-text-color) !important;
+    }
+
+    .markdown-body table th {
+      font-weight: 600;
+      background: var(--table-header-bg) !important;
+    }
+
+    .markdown-body table a {
+      color: var(--markdown-link-color) !important;
     }
 
     .markdown-body img {
