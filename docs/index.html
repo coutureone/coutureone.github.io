@@ -89,6 +89,9 @@
       --bar-border-color: #ffffff;
       --social-divider-color: rgba(36, 41, 47, 0.35);
       --mermaid-bg: #f6f8fa;
+      --tag-bg: #f6f8fa;
+      --tag-text: #57606a;
+      --tag-border: #d0d7de;
     }
 
     [data-theme="dark"] {
@@ -115,6 +118,9 @@
       --bar-border-color: #0d1117;
       --social-divider-color: rgba(201, 209, 217, 0.72);
       --mermaid-bg: #161b22;
+      --tag-bg: #161b22;
+      --tag-text: #8b949e;
+      --tag-border: #30363d;
     }
 
     /* 全局背景和文字颜色 */
@@ -158,6 +164,13 @@
     #posts .post {
       background-color: var(--bg-color) !important;
       color: var(--text-color) !important;
+    }
+
+    #posts > .post span {
+      background-color: var(--tag-bg) !important;
+      color: var(--tag-text) !important;
+      border-color: var(--tag-border) !important;
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
     }
 
     /* 按钮样式 - 完美居中 */
